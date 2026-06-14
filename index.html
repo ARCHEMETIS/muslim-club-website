@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ชมรมมุสลิม มหาวิทยาลัยขอนแก่น · Muslim Community KKU</title>
+<meta name="description" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น — เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของพี่น้องนักศึกษามุสลิม มอดินแดง">
+<!-- ไอคอนแท็บเบราว์เซอร์ -->
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="apple-touch-icon" href="assets/img/logo.png">
+<!-- การแสดงผลตอนแชร์ลิงก์ (Facebook/Line) -->
+<meta property="og:title" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น">
+<meta property="og:description" content="เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของชมรมมุสลิม มอดินแดง">
+<meta property="og:type" content="website">
+<!-- ⬇️ หลัง deploy ให้เปลี่ยนเป็นลิงก์เต็มของรูป เช่น https://ชื่อเว็บ/assets/img/logo.png เพื่อให้รูปขึ้นตอนแชร์ -->
+<meta property="og:image" content="assets/img/logo.png">
+<!-- Tailwind แบบไฟล์ในเว็บเอง (ไม่พึ่ง CDN — โหลดเร็ว ไม่ต้องพึ่งเน็ตโหลดสไตล์) -->
+<link rel="stylesheet" href="css/tailwind.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="font-sarabun bg-cream text-stone-700 antialiased">
+
+<!-- ===================== NAVBAR ===================== -->
+<header id="nav" class="sticky top-0 z-50 bg-cream/85 backdrop-blur-md border-b border-stone-200/70 transition-shadow">
+  <nav class="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
+    <!-- Logo -->
+    <a href="#" onclick="showPage('home',event)" class="flex items-center gap-3 group">
+      <img src="assets/img/logo.png" alt="ตราชมรมมุสลิม มหาวิทยาลัยขอนแก่น" class="w-11 h-11 group-hover:scale-105 transition-transform duration-500">
+      <span class="leading-tight">
+        <span class="block font-kanit font-600 text-green-800 text-[19px] tracking-tight">ชมรมมุสลิม</span>
+        <span class="block text-[11px] tracking-[0.12em] text-gold-dark font-500 whitespace-nowrap">ม.ขอนแก่น · KKU</span>
+      </span>
+    </a>
+
+    <!-- Desktop menu -->
+    <div class="hidden md:flex items-center gap-9 font-kanit font-500 text-[15px] text-stone-600 whitespace-nowrap">
+      <a href="#" data-page="home"    onclick="showPage('home',event)"    class="nav-link active-link transition-colors hover:text-green-700">หน้าแรก</a>
+      <a href="#" data-page="archive" onclick="showPage('archive',event)" class="nav-link transition-colors hover:text-green-700">คลังเอกสาร</a>
+      <a href="#" data-page="finance" onclick="showPage('finance',event)" class="nav-link transition-colors hover:text-green-700">การเงิน</a>
+      <a href="#" data-page="contact" onclick="showPage('contact',event)" class="nav-link transition-colors hover:text-green-700">ติดต่อเรา</a>
+      <a href="#" onclick="showPage('contact',event)" class="ml-1 inline-flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-full text-[14px] shadow-sm hover:shadow-md transition-all">
+        <i class="fa-regular fa-hand-pointer text-[12px]"></i> เข้าร่วมชมรม
+      </a>
+    </div>
+
+    <!-- Hamburger -->
+    <button id="burger" onclick="toggleMenu()" class="md:hidden w-11 h-11 grid place-items-center text-green-800 text-xl rounded-lg hover:bg-green-50 transition" aria-label="เมนู">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="md:hidden hidden border-t border-stone-200 bg-cream">
+    <div class="px-5 py-3 flex flex-col font-kanit font-500 text-stone-700">
+      <a href="#" onclick="showPage('home',event)"    class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-house w-5 text-gold-dark"></i> หน้าแรก</a>
+      <a href="#" onclick="showPage('archive',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-folder-open w-5 text-gold-dark"></i> คลังเอกสาร</a>
+      <a href="#" onclick="showPage('finance',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-chart-column w-5 text-gold-dark"></i> การเงิน</a>
+      <a href="#" onclick="showPage('contact',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-envelope w-5 text-gold-dark"></i> ติดต่อเรา</a>
+      <a href="#" onclick="showPage('contact',event)" class="mt-2 mb-1 text-center bg-green-800 text-white py-3 rounded-full">เข้าร่วมชมรม</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ========================================================= -->
+<!-- ====================== HOME PAGE ======================== -->
+<!-- ========================================================= -->
+<section id="page-home" class="page active">
+
+  <!-- HERO -->
+  <div class="relative overflow-hidden bg-gradient-to-b from-cream to-sand">
+    <div class="absolute inset-0 islamic-pattern pattern-faint"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+      <!-- copy -->
+      <div class="order-2 lg:order-1 text-center lg:text-left">
+        <p class="font-amiri text-2xl text-gold-dark mb-3" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <span class="inline-flex items-center gap-2 text-[13px] font-kanit font-500 text-green-700 bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-full">
+          <i class="fa-solid fa-mosque text-[11px]"></i> <span id="c-club">ชมรมมุสลิม มหาวิทยาลัยขอนแก่น</span>
+        </span>
+        <h1 id="c-herotitle" class="font-kanit font-700 text-green-900 text-4xl sm:text-5xl lg:text-[3.4rem] leading-[1.12] mt-5">
+          รวมพี่น้องมุสลิม<br><span class="text-green-700">รักษาญามาอะห์ไว้ด้วยกัน</span>
+        </h1>
+        <p id="c-herotext" class="mt-5 text-[17px] leading-relaxed text-stone-600 max-w-xl mx-auto lg:mx-0">
+          ชมรมมุสลิม มหาวิทยาลัยขอนแก่น คือการรวมตัวของพี่น้องนักศึกษามุสลิมในรั้วมอดินแดง
+          เพื่อรักษาญามาอะห์ ละหมาดร่วมกัน ศึกษาศาสนา และเกื้อกูลกันฉันพี่น้อง ให้พลังศรัทธาเติบโตเคียงข้างการเรียนรู้
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
+          <a href="#" onclick="showPage('contact',event)" class="inline-flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white font-kanit font-500 px-6 py-3 rounded-full shadow-sm hover:shadow-lg transition-all">
+            <i class="fa-solid fa-people-group"></i> สมัครเป็นสมาชิก
+          </a>
+          <a href="#" onclick="showPage('archive',event)" class="inline-flex items-center gap-2 border border-green-200 text-green-800 hover:bg-green-50 font-kanit font-500 px-6 py-3 rounded-full transition-all">
+            <i class="fa-solid fa-book-open"></i> คลังความรู้
+          </a>
+        </div>
+        <!-- mini stats -->
+        <div id="c-stats" class="mt-9 grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
+          <div><p class="font-kanit font-700 text-3xl text-green-800">320+</p><p class="text-[13px] text-stone-500 mt-0.5">สมาชิก</p></div>
+          <div class="border-x border-stone-200"><p class="font-kanit font-700 text-3xl text-green-800">32</p><p class="text-[13px] text-stone-500 mt-0.5">ปีที่ก่อตั้ง</p></div>
+          <div><p class="font-kanit font-700 text-3xl text-green-800">48</p><p class="text-[13px] text-stone-500 mt-0.5">กิจกรรม/ปี</p></div>
+        </div>
+      </div>
+
+      <!-- Tamarind tree inside mihrab arch -->
+      <div class="order-1 lg:order-2 flex justify-center">
+        <div class="relative">
+          <div class="w-[300px] h-[400px] sm:w-[340px] sm:h-[452px] bg-white arch-frame border border-green-100 shadow-xl shadow-green-900/10 grid place-items-center overflow-hidden relative">
+            <div class="absolute inset-0 islamic-pattern" style="opacity:.04"></div>
+            <img src="assets/img/hero.png" alt="ตราชมรมมุสลิม มหาวิทยาลัยขอนแก่น (Muslim Community, Khon Kaen University)" class="relative w-[92%] max-w-[330px] object-contain drop-shadow-sm">
+          </div>
+          <!-- floating prayer chip -->
+          <div class="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-lg border border-stone-100 px-4 py-3 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-green-800 text-gold grid place-items-center"><i class="fa-solid fa-clock"></i></span>
+            <div><p class="text-[11px] text-stone-400 leading-none">ละหมาดถัดไป</p><p class="font-kanit font-600 text-green-800 leading-tight" id="hero-next">ซุฮรี · 12:15</p><p class="text-[11px] text-gold-dark font-kanit font-500 leading-none mt-0.5" id="hero-countdown"></p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRAYER TIMES CARD (luxe) -->
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 -mt-2 lg:-mt-6 relative z-10">
+    <div class="rounded-[28px] bg-green-900 text-white overflow-hidden shadow-2xl shadow-green-900/30 relative">
+      <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+      <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-green-800/50 blur-2xl"></div>
+      <div class="relative p-6 sm:p-9">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
+          <div>
+            <p class="font-kanit text-gold-light text-[13px] tracking-[0.25em] font-500">PRAYER TIMES · เวลาละหมาดวันนี้</p>
+            <h2 class="font-kanit font-600 text-2xl sm:text-3xl mt-1">ตารางเวลาละหมาด</h2>
+          </div>
+          <div class="text-left sm:text-right">
+            <p class="font-kanit font-500 text-white/90 flex items-center gap-2 sm:justify-end"><i class="fa-solid fa-location-dot text-gold"></i> <span id="c-location">มหาวิทยาลัยขอนแก่น · ขอนแก่น</span></p>
+            <p class="text-white/60 text-sm mt-0.5" id="prayer-date">อังคาร · ๑๕ ซุลฮิจญะฮ์ ๑๔๔๗ ฮ.ศ.</p>
+          </div>
+        </div>
+        <div id="prayerGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <!-- prayers injected by JS -->
+        </div>
+        <div class="brass-rule mt-7 mb-4 opacity-60"></div>
+        <p class="text-white/55 text-sm flex items-center gap-2"><i class="fa-regular fa-sun text-gold"></i> ดวงอาทิตย์ขึ้น 06:12 · พระอาทิตย์ตก 18:24 — เวลาโดยประมาณ โปรดตรวจสอบกับมัสยิดในพื้นที่</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWS / ACTIVITIES -->
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-20">
+    <div class="flex items-end justify-between mb-9">
+      <div>
+        <span class="font-kanit text-gold-dark text-[13px] tracking-[0.25em] font-600">ACTIVITIES</span>
+        <h2 class="font-kanit font-600 text-3xl text-green-900 mt-1">ข่าวสาร &amp; กิจกรรมล่าสุด</h2>
+      </div>
+    </div>
+    <div id="annList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- ===================== ARCHIVE PAGE ====================== -->
+<!-- ========================================================= -->
+<section id="page-archive" class="page">
+  <div class="bg-green-900 relative overflow-hidden">
+    <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 text-white">
+      <span class="font-kanit text-gold-light text-[13px] tracking-[0.25em] font-500">DOCUMENT ARCHIVE</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl mt-2">คลังเอกสาร</h1>
+      <p class="text-white/70 mt-2 max-w-2xl">ดาวน์โหลดเอกสาร แบบฟอร์ม รายงานการประชุม และสื่อการเรียนรู้ของชมรม จัดเก็บอย่างเป็นระบบตามหมวดหมู่</p>
+      <div class="mt-6 max-w-md relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+        <input id="docSearch" type="text" oninput="Documents.search(this.value)" placeholder="ค้นหาเอกสาร..." class="w-full bg-white/95 text-stone-700 rounded-full pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-gold placeholder-stone-400">
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <div class="flex flex-wrap items-center gap-3">
+        <select id="docYear" onchange="Documents.setYear(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer"></select>
+        <select id="docTerm" onchange="Documents.setTerm(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer"></select>
+      </div>
+      <div class="flex items-center gap-3">
+        <select id="docSort" onchange="Documents.sort(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer">
+          <option value="new">ใหม่สุดก่อน</option>
+          <option value="old">เก่าสุดก่อน</option>
+          <option value="name">ตามชื่อ ก–ฮ</option>
+        </select>
+        <span id="docAddBtn"></span>
+      </div>
+    </div>
+    <p id="docCount" class="text-sm text-stone-400 font-kanit mb-6"></p>
+
+    <!-- รายการเอกสาร (สร้างโดย js/documents.js) -->
+    <div id="docList" class="space-y-10"></div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- ===================== FINANCE PAGE ====================== -->
+<!-- ========================================================= -->
+<section id="page-finance" class="page">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-9">
+      <div>
+        <span class="font-kanit text-gold-dark text-[13px] tracking-[0.25em] font-600">TRANSPARENCY</span>
+        <h1 class="font-kanit font-600 text-3xl sm:text-4xl text-green-900 mt-1">ระบบการเงินชมรม</h1>
+        <p class="text-stone-500 mt-2">สรุปสถานะการเงินประจำปีงบประมาณ 2569 · เพื่อความโปร่งใสต่อสมาชิกทุกคน</p>
+      </div>
+      <div class="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-kanit font-500 self-start"><i class="fa-solid fa-circle-check"></i> ตรวจสอบล่าสุด <span id="finUpdated">8 มิ.ย. 2569</span></div>
+    </div>
+
+    <!-- ตัวกรอง + ส่งออก -->
+    <div class="flex flex-wrap items-center gap-3 mb-6 fin-controls">
+      <select id="finSchoolYear" onchange="Finance.setSchoolYear(this.value)" class="font-kanit font-600 text-sm bg-green-800 text-white border border-green-800 rounded-full px-4 py-2 outline-none cursor-pointer hidden"></select>
+      <select id="finYear" onchange="Finance.setYear(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer"></select>
+      <select id="finCat" onchange="Finance.setCat(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer"></select>
+      <select id="finProject" onchange="Finance.setProject(this.value)" class="font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 rounded-full px-4 py-2 outline-none focus:border-green-400 cursor-pointer"></select>
+      <span class="flex-1"></span>
+      <button onclick="Finance.exportCSV()" class="inline-flex items-center gap-2 font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 hover:border-green-300 hover:text-green-700 px-4 py-2 rounded-full transition"><i class="fa-solid fa-file-csv"></i> ดาวน์โหลด CSV</button>
+      <button onclick="Finance.printReport()" class="inline-flex items-center gap-2 font-kanit font-500 text-sm bg-white border border-stone-200 text-stone-600 hover:border-green-300 hover:text-green-700 px-4 py-2 rounded-full transition"><i class="fa-solid fa-print"></i> พิมพ์รายงาน</button>
+    </div>
+
+    <!-- summary cards -->
+    <div class="grid sm:grid-cols-3 gap-5 mb-7">
+      <div class="lift bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <span class="w-11 h-11 rounded-xl bg-green-50 text-green-600 grid place-items-center text-lg"><i class="fa-solid fa-arrow-down"></i></span>
+          <span id="finIncomeCount" class="text-[12px] font-kanit font-600 text-green-600 bg-green-50 px-2.5 py-1 rounded-full">—</span>
+        </div>
+        <p class="text-stone-400 text-sm mt-4">รายรับรวม</p>
+        <p id="finIncome" class="font-kanit font-700 text-3xl text-green-800 mt-1">฿248,500</p>
+      </div>
+      <div class="lift bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <span class="w-11 h-11 rounded-xl bg-rose-50 text-rose-500 grid place-items-center text-lg"><i class="fa-solid fa-arrow-up"></i></span>
+          <span id="finExpenseCount" class="text-[12px] font-kanit font-600 text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full">—</span>
+        </div>
+        <p class="text-stone-400 text-sm mt-4">รายจ่ายรวม</p>
+        <p id="finExpense" class="font-kanit font-700 text-3xl text-rose-600 mt-1">฿171,200</p>
+      </div>
+      <div class="lift bg-green-900 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden">
+        <div class="absolute inset-0 islamic-pattern" style="opacity:.1"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between">
+            <span class="w-11 h-11 rounded-xl bg-white/10 text-gold grid place-items-center text-lg"><i class="fa-solid fa-wallet"></i></span>
+            <span class="text-[12px] font-kanit font-600 text-gold-light bg-white/10 px-2.5 py-1 rounded-full">คงเหลือสุทธิ</span>
+          </div>
+          <p class="text-white/60 text-sm mt-4">งบคงเหลือ</p>
+          <p id="finBalance" class="font-kanit font-700 text-3xl text-gold-light mt-1">฿77,300</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-7">
+      <!-- bar chart -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-stone-100 shadow-sm p-6 sm:p-7">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="font-kanit font-600 text-lg text-green-900">รายรับ–รายจ่าย รายเดือน</h3>
+          <div class="flex items-center gap-4 text-[13px] font-kanit font-500">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-600"></span> รายรับ</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gold"></span> รายจ่าย</span>
+          </div>
+        </div>
+        <div class="relative pl-10">
+          <div id="chartGrid" class="absolute left-10 right-0 top-0 h-56 pointer-events-none"></div>
+          <div id="chart" class="relative flex items-end justify-between gap-3 sm:gap-5 h-56 border-b border-stone-100"></div>
+          <div id="chartLabels" class="flex justify-between gap-3 sm:gap-5 mt-3 text-[13px] text-stone-400 font-kanit font-500"></div>
+        </div>
+      </div>
+
+      <!-- expense breakdown (conic donut) -->
+      <div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 sm:p-7">
+        <div class="flex items-center justify-between mb-5 gap-2">
+          <h3 id="finDonutTitle" class="font-kanit font-600 text-lg text-green-900">สัดส่วนรายจ่าย</h3>
+          <div id="finDonutToggle" class="flex bg-stone-100 rounded-full p-0.5 text-[12px] font-kanit font-600"></div>
+        </div>
+        <div class="grid place-items-center mb-5">
+          <div id="finDonut" class="relative w-40 h-40 rounded-full" style="background:#e7e5e4;">
+            <div class="absolute inset-4 bg-white rounded-full grid place-items-center text-center">
+              <div><p id="finDonutTotal" class="font-kanit font-700 text-2xl text-green-800">฿171K</p><p id="finDonutLabel" class="text-[12px] text-stone-400">รวมรายจ่าย</p></div>
+            </div>
+          </div>
+        </div>
+        <ul id="finBreakdown" class="space-y-3 text-sm font-sarabun"></ul>
+      </div>
+    </div>
+
+    <!-- recent transactions -->
+    <div class="bg-white rounded-2xl border border-stone-100 shadow-sm mt-7 overflow-hidden">
+      <div class="p-6 pb-3 flex items-center justify-between">
+        <h3 class="font-kanit font-600 text-lg text-green-900">รายการเคลื่อนไหวล่าสุด</h3>
+        <a href="#" class="text-green-700 text-sm font-kanit font-500 hover:underline">ดูทั้งหมด</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[560px]">
+          <thead class="text-[13px] text-stone-400 font-kanit font-500 border-y border-stone-100 bg-stone-50/50">
+            <tr><th class="px-6 py-3 font-500">รายการ</th><th class="px-6 py-3 font-500">หมวด</th><th class="px-6 py-3 font-500">ผู้รับผิดชอบ</th><th class="px-6 py-3 font-500">วันที่</th><th class="px-6 py-3 font-500 text-right">จำนวน</th><th class="px-6 py-3 font-500 text-center">หลักฐาน</th></tr>
+          </thead>
+          <tbody id="finTxBody" class="divide-y divide-stone-100 text-[15px]"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- สรุปแยกตามโครงการ -->
+    <div class="bg-white rounded-2xl border border-stone-100 shadow-sm mt-7 p-6 sm:p-7">
+      <h3 class="font-kanit font-600 text-lg text-green-900 mb-5 flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i class="fa-solid fa-folder-tree"></i></span> สรุปแยกตามโครงการ</h3>
+      <div id="finProjects" class="grid sm:grid-cols-2 gap-x-8 gap-y-6"></div>
+    </div>
+
+    <!-- ปฏิทินรายรับ–รายจ่ายรายวัน -->
+    <div class="bg-white rounded-2xl border border-stone-100 shadow-sm mt-7 p-6 sm:p-7">
+      <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <h3 class="font-kanit font-600 text-lg text-green-900 flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i class="fa-solid fa-calendar-days"></i></span> ปฏิทินรายรับ–รายจ่าย</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="Finance.calMove(-1)" class="w-9 h-9 rounded-full border border-stone-200 text-stone-500 hover:border-green-300 hover:text-green-700 grid place-items-center transition"><i class="fa-solid fa-chevron-left text-sm"></i></button>
+          <span id="finCalLabel" class="font-kanit font-600 text-green-900 min-w-[150px] text-center"></span>
+          <button onclick="Finance.calMove(1)" class="w-9 h-9 rounded-full border border-stone-200 text-stone-500 hover:border-green-300 hover:text-green-700 grid place-items-center transition"><i class="fa-solid fa-chevron-right text-sm"></i></button>
+        </div>
+      </div>
+      <div id="finCalSummary" class="flex flex-wrap gap-2.5 mb-4"></div>
+      <div class="grid grid-cols-7 gap-1.5 text-center text-[12px] font-kanit font-600 text-stone-400 mb-1.5">
+        <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+      </div>
+      <div id="finCalGrid" class="grid grid-cols-7 gap-1.5"></div>
+      <div id="finCalDetail" class="mt-4"></div>
+      <p class="text-[12px] text-stone-400 mt-3 text-center"><i class="fa-regular fa-hand-pointer"></i> แตะวันที่มีรายการ เพื่อดูรายละเอียด</p>
+    </div>
+
+    <!-- บัญชีย้อนหลัง (ปีที่ปิดบัญชีแล้ว — กดเพื่อดู) -->
+    <div id="finLedgerWrap" class="bg-white rounded-2xl border border-stone-100 shadow-sm mt-7 p-6 sm:p-7 hidden">
+      <h3 class="font-kanit font-600 text-lg text-green-900 flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i class="fa-solid fa-box-archive"></i></span> บัญชีย้อนหลัง</h3>
+      <p class="text-[13px] text-stone-400 mt-1 mb-4">บันทึกรายรับ–รายจ่ายของปีที่ปิดบัญชีแล้ว (พร้อมหลักฐาน) — กดเพื่อดูตาราง</p>
+      <div id="finLedgerList" class="space-y-3"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- ===================== CONTACT PAGE ====================== -->
+<!-- ========================================================= -->
+<section id="page-contact" class="page">
+  <div class="bg-gradient-to-b from-sand to-cream relative overflow-hidden">
+    <div class="absolute inset-0 islamic-pattern pattern-faint"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 text-center">
+      <span class="font-kanit text-gold-dark text-[13px] tracking-[0.25em] font-600">GET IN TOUCH</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl text-green-900 mt-2">ติดต่อเรา</h1>
+      <p class="text-stone-500 mt-3 max-w-2xl mx-auto">มีคำถาม ข้อเสนอแนะ หรืออยากร่วมเป็นส่วนหนึ่งกับเรา? ทักทายได้เสมอ ชมรมมุสลิม มอดินแดง ยินดีต้อนรับพี่น้องทุกคน</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <!-- committee directory -->
+    <h2 class="font-kanit font-600 text-2xl text-green-900 mb-6 flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i class="fa-solid fa-user-tie"></i></span> ทำเนียบคณะกรรมการ</h2>
+    <div id="committeeList" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14"></div>
+
+    <!-- contact info + form -->
+    <div class="grid lg:grid-cols-5 gap-7">
+      <!-- info -->
+      <div class="lg:col-span-2 space-y-5">
+        <div class="bg-green-900 text-white rounded-2xl p-7 relative overflow-hidden">
+          <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+          <div class="relative space-y-5">
+            <h3 class="font-kanit font-600 text-xl">ข้อมูลการติดต่อ</h3>
+            <div class="flex items-start gap-4"><span class="w-10 h-10 shrink-0 rounded-xl bg-white/10 text-gold grid place-items-center"><i class="fa-solid fa-location-dot"></i></span><div><p class="font-kanit font-500">ที่ตั้งชมรม</p><p id="ct-address" class="text-white/70 text-sm mt-0.5">ห้องชมรมมุสลิม อาคารกิจกรรมนักศึกษา มหาวิทยาลัยขอนแก่น</p></div></div>
+            <div class="flex items-start gap-4"><span class="w-10 h-10 shrink-0 rounded-xl bg-white/10 text-gold grid place-items-center"><i class="fa-solid fa-phone"></i></span><div><p class="font-kanit font-500">โทรศัพท์</p><p class="text-white/70 text-sm mt-0.5"><a id="ct-phone" href="#" class="hover:text-gold-light transition">02-123-4567</a></p></div></div>
+            <div class="flex items-start gap-4"><span class="w-10 h-10 shrink-0 rounded-xl bg-white/10 text-gold grid place-items-center"><i class="fa-solid fa-envelope"></i></span><div><p class="font-kanit font-500">อีเมล</p><p class="text-white/70 text-sm mt-0.5"><a id="ct-email" href="#" class="hover:text-gold-light transition">—</a></p></div></div>
+            <div class="brass-rule opacity-50"></div>
+            <div id="ct-socials" class="flex gap-3">
+              <a id="ct-fb" href="#" target="_blank" rel="noopener" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center text-lg transition"><i class="fa-brands fa-facebook-f"></i></a>
+              <a id="ct-line" href="#" target="_blank" rel="noopener" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center text-lg transition"><i class="fa-brands fa-line"></i></a>
+              <a id="ct-ig" href="#" target="_blank" rel="noopener" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center text-lg transition"><i class="fa-brands fa-instagram"></i></a>
+              <a id="ct-yt" href="#" target="_blank" rel="noopener" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center text-lg transition"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- google form placeholder -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-7">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="font-kanit font-600 text-xl text-green-900">แบบฟอร์มติดต่อ / สมัครสมาชิก</h3>
+            <span class="text-[12px] font-kanit font-500 text-stone-400 bg-stone-50 px-3 py-1 rounded-full"><i class="fa-brands fa-google text-green-600"></i> Google Forms</span>
+          </div>
+          <!-- ฟอร์มสมัครสมาชิก (จัดการโดย js/contact.js) -->
+          <div id="membershipForm" class="rounded-xl border-2 border-dashed border-green-200 bg-green-50/40 p-8 grid place-items-center text-center min-h-[420px]">
+            <div class="max-w-sm">
+              <div class="w-16 h-16 mx-auto rounded-2xl bg-white shadow-sm grid place-items-center text-green-600 text-2xl mb-4"><i class="fa-brands fa-wpforms"></i></div>
+              <p class="font-kanit font-600 text-green-900 text-lg">พื้นที่สำหรับฝัง Google Forms</p>
+              <p class="text-stone-500 text-sm mt-2 leading-relaxed">วางโค้ด <code class="bg-white px-1.5 py-0.5 rounded text-green-700 text-[13px]">&lt;iframe&gt;</code> ของฟอร์มลงตรงนี้ ระบบจะแสดงแบบฟอร์มจริงพอดีกับกรอบ พร้อมใช้งานบนมือถือ</p>
+              <div class="mt-6 space-y-3 text-left">
+                <div class="h-10 rounded-lg bg-white border border-stone-200"></div>
+                <div class="h-10 rounded-lg bg-white border border-stone-200"></div>
+                <div class="h-20 rounded-lg bg-white border border-stone-200"></div>
+                <button class="w-full bg-green-800 text-white font-kanit font-500 py-3 rounded-full mt-1">ส่งแบบฟอร์ม</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="bg-green-950 text-white/80 mt-4">
+  <div class="islamic-pattern" style="opacity:.07; height:6px;"></div>
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-9">
+    <div class="sm:col-span-2 lg:col-span-1">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-11 h-11 rounded-full bg-white grid place-items-center shrink-0 overflow-hidden"><img src="assets/img/about.png" alt="ตราชมรมมุสลิม ม.ขอนแก่น" class="w-11 h-11"></span>
+        <div><p class="font-kanit font-600 text-white text-lg leading-tight">ชมรมมุสลิม</p><p class="text-gold-light text-[11px] tracking-[0.26em]">ม.ขอนแก่น · KKU</p></div>
+      </div>
+      <p class="text-sm leading-relaxed text-white/60">ชมรมมุสลิม มหาวิทยาลัยขอนแก่น รวมพี่น้องนักศึกษามุสลิม รักษาญามาอะห์ ละหมาดและเรียนรู้ศาสนาร่วมกันในรั้วมอดินแดง</p>
+    </div>
+    <div>
+      <p class="font-kanit font-600 text-white mb-4">เมนู</p>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="#" onclick="showPage('home',event)" class="hover:text-gold-light transition">หน้าแรก</a></li>
+        <li><a href="#" onclick="showPage('archive',event)" class="hover:text-gold-light transition">คลังเอกสาร</a></li>
+        <li><a href="#" onclick="showPage('finance',event)" class="hover:text-gold-light transition">การเงิน</a></li>
+        <li><a href="#" onclick="showPage('contact',event)" class="hover:text-gold-light transition">ติดต่อเรา</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="font-kanit font-600 text-white mb-4">เวลาละหมาด</p>
+      <ul class="space-y-2.5 text-sm text-white/60">
+        <li class="flex justify-between"><span>ซุบฮิ</span><span class="font-kanit text-white/80">04:48</span></li>
+        <li class="flex justify-between"><span>ซุฮรี</span><span class="font-kanit text-white/80">12:15</span></li>
+        <li class="flex justify-between"><span>อัศรี</span><span class="font-kanit text-white/80">15:32</span></li>
+        <li class="flex justify-between"><span>มัฆริบ</span><span class="font-kanit text-white/80">18:24</span></li>
+        <li class="flex justify-between"><span>อิชาอ์</span><span class="font-kanit text-white/80">19:38</span></li>
+      </ul>
+    </div>
+    <div>
+      <p class="font-kanit font-600 text-white mb-4">ติดตามเรา</p>
+      <div class="flex gap-3">
+        <a id="ft-fb" href="#" target="_blank" rel="noopener" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center transition"><i class="fa-brands fa-facebook-f"></i></a>
+        <a id="ft-line" href="#" target="_blank" rel="noopener" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center transition"><i class="fa-brands fa-line"></i></a>
+        <a id="ft-ig" href="#" target="_blank" rel="noopener" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center transition"><i class="fa-brands fa-instagram"></i></a>
+      </div>
+      <p class="font-amiri text-gold-light text-lg mt-6" dir="rtl">السلام عليكم</p>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-5 text-center text-white/40 text-[13px]">© 2569 ชมรมมุสลิม มหาวิทยาลัยขอนแก่น — รวมพี่น้องมุสลิม รักษาญามาอะห์ไว้ด้วยกัน</div>
+  </div>
+</footer>
+
+<!-- รายงานการเงินแบบทางการ (แสดงเฉพาะตอนสั่งพิมพ์ — สร้างโดย finance.js) -->
+<div id="finReport"></div>
+
+<!-- ⬇️ ระบบทั้งหมดของเว็บ โหลดตามลำดับนี้ (config ต้องมาก่อนเสมอ) -->
+<!-- โหลด config ใหม่เสมอ (กันแคช) เพื่อให้คำที่แก้ใน config.js ขึ้นทันที -->
+<script>document.write('<scr'+'ipt src="js/config.js?t='+Date.now()+'"><\/scr'+'ipt>');</script>
+<script src="js/sheets.js"></script>
+<script src="js/main.js"></script>
+<script src="js/content.js"></script>
+<script src="js/prayer.js"></script>
+<script src="js/documents.js?v=4"></script>
+<script src="js/finance.js?v=9"></script>
+<script src="js/announcements.js?v=6"></script>
+<script src="js/committee.js?v=7"></script>
+<script src="js/contact.js?v=2"></script>
+</body>
+</html>

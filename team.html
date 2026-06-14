@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>พื้นที่ทีมงาน · ชมรมมุสลิม มอดินแดง</title>
+<link rel="icon" type="image/png" href="assets/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Tailwind แบบไฟล์ในเว็บเอง (ไม่พึ่ง CDN) -->
+<link rel="stylesheet" href="css/tailwind.css">
+</head>
+<body class="bg-cream font-sarabun text-stone-700 min-h-screen">
+  <div class="max-w-3xl mx-auto px-5 py-12">
+
+    <!-- header -->
+    <div class="text-center">
+      <span class="font-kanit text-gold-dark text-[13px] tracking-[0.25em] font-600">TEAM ONLY</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl text-green-900 mt-2">พื้นที่ทีมงาน</h1>
+      <p class="text-stone-500 mt-2">รวมแบบฟอร์มสำหรับกรรมการ/ทีมงาน — กดเข้ากรอกข้อมูลเข้าเว็บได้เลย</p>
+    </div>
+
+    <!-- คำเตือน -->
+    <div class="mt-6 flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm">
+      <i class="fa-solid fa-shield-halved mt-0.5"></i>
+      <p><b>หน้านี้สำหรับทีมงานเท่านั้น</b> — อย่าแชร์ลิงก์หน้านี้ในที่สาธารณะ (หน้าเว็บจริงไม่มีลิงก์มาที่นี่) เก็บลิงก์ไว้ที่ทีมงาน เช่น บันทึก/บุ๊กมาร์ก หรือกลุ่มไลน์กรรมการ</p>
+    </div>
+
+    <!-- ฟอร์ม -->
+    <div id="formGrid" class="grid sm:grid-cols-2 gap-5 mt-8"></div>
+
+    <div class="text-center mt-10">
+      <a href="index.html" class="inline-flex items-center gap-2 text-green-700 font-kanit font-500 hover:gap-3 transition-all"><i class="fa-solid fa-arrow-left text-sm"></i> กลับไปดูเว็บจริง</a>
+    </div>
+  </div>
+
+  <!-- โหลด config ใหม่เสมอ (กันแคช) เพื่อให้ลิงก์ที่เพิ่งแก้ขึ้นทันที -->
+  <script>document.write('<scr'+'ipt src="js/config.js?t='+Date.now()+'"><\/scr'+'ipt>');</script>
+  <script>
+    const FORMS = [
+      { key:'documents',     icon:'fa-folder-open', color:'green-700', title:'เพิ่มเอกสาร',       desc:'อัปโหลดเอกสาร/โครงการเข้าคลังเอกสาร' },
+      { key:'finance',       icon:'fa-wallet',      color:'gold-dark', title:'บันทึกการเงิน',     desc:'เพิ่มรายการรับ–จ่ายของชมรม' },
+      { key:'announcements', icon:'fa-bullhorn',    color:'green-600', title:'เพิ่มประกาศ',       desc:'โพสต์ข่าวสาร/กิจกรรมขึ้นหน้าแรก' },
+      { key:'committee',     icon:'fa-user-tie',    color:'green-700', title:'แก้ทำเนียบกรรมการ', desc:'เพิ่ม/เปลี่ยนรายชื่อกรรมการชมรม' },
+      { key:'membership',    icon:'fa-user-plus',   color:'green-800', title:'ฟอร์มสมัครสมาชิก',  desc:'ลิงก์ฟอร์มไว้แชร์ให้สมาชิกใหม่' },
+    ];
+    const F = (window.CONFIG && CONFIG.forms) || {};
+    document.getElementById('formGrid').innerHTML = FORMS.map(f => {
+      const url = F[f.key];
+      const action = url
+        ? `<a href="${url}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 bg-green-800 hover:bg-green-900 text-white font-kanit font-500 px-5 py-2.5 rounded-full transition w-full">เปิดฟอร์ม <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>`
+        : `<span class="mt-4 inline-flex items-center justify-center gap-2 bg-stone-100 text-stone-400 font-kanit font-500 px-5 py-2.5 rounded-full w-full">ยังไม่ได้ตั้งค่าลิงก์</span>`;
+      return `<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col">
+        <span class="w-12 h-12 rounded-xl bg-green-50 text-${f.color} grid place-items-center text-xl mb-4"><i class="fa-solid ${f.icon}"></i></span>
+        <h3 class="font-kanit font-600 text-lg text-green-900">${f.title}</h3>
+        <p class="text-stone-500 text-sm mt-1 flex-1">${f.desc}</p>
+        ${action}
+      </div>`;
+    }).join('');
+  </script>
+</body>
+</html>

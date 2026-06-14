@@ -1,0 +1,16 @@
+# ข้อมูลจริง/ส่วนตัว — ใช้ js/config.example.js เป็นแม่แบบแทน
+# (คัดลอกเป็น js/config.js แล้วกรอกลิงก์/ข้อมูลจริง ซึ่งไม่ถูกอัปขึ้น repo)
+js/config.js
+
+# ไฟล์ระบบ/เอดิเตอร์
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+node_modules/
+
+# Claude Code / เครื่องมือ dev (ไม่เกี่ยวกับเว็บ)
+.claude/
+
+# ไฟล์สำรองเก่า
+*.backup.html
