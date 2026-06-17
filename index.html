@@ -8,12 +8,16 @@
 <!-- ไอคอนแท็บเบราว์เซอร์ -->
 <link rel="icon" type="image/png" href="assets/img/logo.png">
 <link rel="apple-touch-icon" href="assets/img/logo.png">
-<!-- การแสดงผลตอนแชร์ลิงก์ (Facebook/Line) -->
+<!-- การแสดงผลตอนแชร์ลิงก์ (Facebook/Line/Messenger) -->
 <meta property="og:title" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น">
 <meta property="og:description" content="เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของชมรมมุสลิม มอดินแดง">
 <meta property="og:type" content="website">
-<!-- ⬇️ หลัง deploy ให้เปลี่ยนเป็นลิงก์เต็มของรูป เช่น https://ชื่อเว็บ/assets/img/logo.png เพื่อให้รูปขึ้นตอนแชร์ -->
-<meta property="og:image" content="assets/img/logo.png">
+<meta property="og:url" content="https://muslimclub-kku.netlify.app/">
+<meta property="og:image" content="https://muslimclub-kku.netlify.app/assets/img/logo.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น">
+<meta name="twitter:description" content="เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของชมรมมุสลิม มอดินแดง">
+<meta name="twitter:image" content="https://muslimclub-kku.netlify.app/assets/img/logo.png">
 <!-- Tailwind แบบไฟล์ในเว็บเอง (ไม่พึ่ง CDN — โหลดเร็ว ไม่ต้องพึ่งเน็ตโหลดสไตล์) -->
 <link rel="stylesheet" href="css/tailwind.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,9 +41,11 @@
     </a>
 
     <!-- Desktop menu -->
-    <div class="hidden md:flex items-center gap-9 font-kanit font-500 text-[15px] text-stone-600 whitespace-nowrap">
+    <div class="hidden md:flex items-center gap-6 font-kanit font-500 text-[15px] text-stone-600 whitespace-nowrap">
       <a href="#" data-page="home"    onclick="showPage('home',event)"    class="nav-link active-link transition-colors hover:text-green-700">หน้าแรก</a>
       <a href="#" data-page="archive" onclick="showPage('archive',event)" class="nav-link transition-colors hover:text-green-700">คลังเอกสาร</a>
+      <a href="#" data-page="knowledge" onclick="showPage('knowledge',event)" class="nav-link transition-colors hover:text-green-700">คลังความรู้</a>
+      <a href="#" data-page="events" onclick="showPage('events',event)" class="nav-link transition-colors hover:text-green-700">กิจกรรม</a>
       <a href="#" data-page="finance" onclick="showPage('finance',event)" class="nav-link transition-colors hover:text-green-700">การเงิน</a>
       <a href="#" data-page="contact" onclick="showPage('contact',event)" class="nav-link transition-colors hover:text-green-700">ติดต่อเรา</a>
       <a href="#" onclick="showPage('contact',event)" class="ml-1 inline-flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-full text-[14px] shadow-sm hover:shadow-md transition-all">
@@ -58,6 +64,8 @@
     <div class="px-5 py-3 flex flex-col font-kanit font-500 text-stone-700">
       <a href="#" onclick="showPage('home',event)"    class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-house w-5 text-gold-dark"></i> หน้าแรก</a>
       <a href="#" onclick="showPage('archive',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-folder-open w-5 text-gold-dark"></i> คลังเอกสาร</a>
+      <a href="#" onclick="showPage('knowledge',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-book-open-reader w-5 text-gold-dark"></i> คลังความรู้</a>
+      <a href="#" onclick="showPage('events',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-calendar-days w-5 text-gold-dark"></i> กิจกรรม</a>
       <a href="#" onclick="showPage('finance',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-chart-column w-5 text-gold-dark"></i> การเงิน</a>
       <a href="#" onclick="showPage('contact',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-envelope w-5 text-gold-dark"></i> ติดต่อเรา</a>
       <a href="#" onclick="showPage('contact',event)" class="mt-2 mb-1 text-center bg-green-800 text-white py-3 rounded-full">เข้าร่วมชมรม</a>
@@ -194,6 +202,55 @@
 
     <!-- รายการเอกสาร (สร้างโดย js/documents.js) -->
     <div id="docList" class="space-y-10"></div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- =================== KNOWLEDGE PAGE ====================== -->
+<!-- ========================================================= -->
+<section id="page-knowledge" class="page">
+  <div class="bg-green-900 relative overflow-hidden">
+    <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 text-white">
+      <span class="font-kanit text-gold-light text-[13px] tracking-[0.25em] font-500">KNOWLEDGE LIBRARY</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl mt-2">คลังความรู้</h1>
+      <p class="text-white/70 mt-2 max-w-2xl">รวมสื่อการเรียนรู้ศาสนา — สรุปฮาลาเกาะห์ หนังสือ บทความ วิดีโอ และเสียงบรรยาย เพื่อเสริมความรู้แก่พี่น้องทุกคน</p>
+      <div class="mt-6 max-w-md relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+        <input id="kbSearch" type="text" oninput="Knowledge.search(this.value)" placeholder="ค้นหาความรู้..." class="w-full bg-white/95 text-stone-700 rounded-full pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-gold placeholder-stone-400">
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <div id="kbChips" class="flex flex-wrap gap-2.5 mb-5"></div>
+    <p id="kbCount" class="text-sm text-stone-400 font-kanit mb-6"></p>
+    <div id="kbList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- ===================== EVENTS PAGE ======================= -->
+<!-- ========================================================= -->
+<section id="page-events" class="page">
+  <div class="bg-green-900 relative overflow-hidden">
+    <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 text-white">
+      <span class="font-kanit text-gold-light text-[13px] tracking-[0.25em] font-500">ACTIVITIES TIMELINE</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl mt-2">ตารางกิจกรรม</h1>
+      <p class="text-white/70 mt-2 max-w-2xl">กิจกรรมที่กำลังจะมาถึง พร้อมนับถอยหลัง และติดตามงานของแต่ละฝ่ายแบบเรียลไทม์</p>
+      <p id="evUpcomingCount" class="inline-flex items-center gap-2 mt-5 bg-white/10 text-gold-light font-kanit font-500 text-sm px-4 py-1.5 rounded-full"></p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <h2 class="font-kanit font-600 text-xl text-green-900 flex items-center gap-3 mb-6"><span class="w-9 h-9 rounded-xl bg-green-50 text-green-700 grid place-items-center"><i class="fa-solid fa-hourglass-half"></i></span> กำลังจะมาถึง</h2>
+    <div id="evUpcoming" class="max-w-3xl"></div>
+
+    <div id="evPastWrap" class="mt-12">
+      <h2 class="font-kanit font-600 text-xl text-stone-500 flex items-center gap-3 mb-6"><span class="w-9 h-9 rounded-xl bg-stone-100 text-stone-400 grid place-items-center"><i class="fa-solid fa-clock-rotate-left"></i></span> ผ่านไปแล้ว</h2>
+      <div id="evPast" class="max-w-3xl"></div>
+    </div>
   </div>
 </section>
 
@@ -459,8 +516,11 @@
 <script src="js/sheets.js"></script>
 <script src="js/main.js"></script>
 <script src="js/content.js"></script>
-<script src="js/prayer.js"></script>
+<script src="js/prayer.js?v=2"></script>
+<script src="js/viewer.js"></script>
 <script src="js/documents.js?v=4"></script>
+<script src="js/knowledge.js?v=3"></script>
+<script src="js/events.js?v=2"></script>
 <script src="js/finance.js?v=9"></script>
 <script src="js/announcements.js?v=6"></script>
 <script src="js/committee.js?v=7"></script>

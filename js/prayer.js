@@ -90,7 +90,8 @@
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const key = `prayer-${dd}-${mm}-${now.getFullYear()}`;
 
-    const cached = localStorage.getItem(key);
+    let cached = null;
+    try { cached = localStorage.getItem(key); } catch (e) {}   // กันกรณีเบราว์เซอร์ปิด storage
     if (cached) {
       try { const d = JSON.parse(cached); prayers = buildPrayers(d.timings); setDate(d.date.hijri); } catch (e) {}
     }
@@ -101,7 +102,7 @@
         + `?latitude=${P.lat}&longitude=${P.lng}&method=${P.method}&school=${P.school}`;
       const json = await (await fetch(url)).json();
       if (json.code === 200 && json.data) {
-        localStorage.setItem(key, JSON.stringify(json.data));
+        try { localStorage.setItem(key, JSON.stringify(json.data)); } catch (e) {}
         prayers = buildPrayers(json.data.timings);
         setDate(json.data.date.hijri);
         render();
