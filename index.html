@@ -7,7 +7,15 @@
 <meta name="description" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น — เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของพี่น้องนักศึกษามุสลิม มอดินแดง">
 <!-- ไอคอนแท็บเบราว์เซอร์ -->
 <link rel="icon" type="image/png" href="assets/img/logo.png">
-<link rel="apple-touch-icon" href="assets/img/logo.png">
+<!-- ติดตั้งเป็นแอป (PWA) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14532d">
+<!-- ไอคอน/โหมดแอปสำหรับ iPhone & iPad -->
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ชมรมมุสลิม">
 <!-- การแสดงผลตอนแชร์ลิงก์ (Facebook/Line/Messenger) -->
 <meta property="og:title" content="ชมรมมุสลิม มหาวิทยาลัยขอนแก่น">
 <meta property="og:description" content="เวลาละหมาด คลังเอกสาร การเงินโปร่งใส ข่าวสารและกิจกรรมของชมรมมุสลิม มอดินแดง">
@@ -527,5 +535,14 @@
 <script src="js/announcements.js?v=6"></script>
 <script src="js/committee.js?v=7"></script>
 <script src="js/contact.js?v=2"></script>
+
+<!-- ลงทะเบียน Service Worker — ทำให้ติดตั้งเป็นแอปได้ + เปิดได้ตอนเน็ตหลุด -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>
