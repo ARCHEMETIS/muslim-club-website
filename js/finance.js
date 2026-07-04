@@ -113,9 +113,10 @@ window.Finance = (function () {
       m[k]=m[k]||{idx:k,label:MONTHS[k]||r['วันที่'],in:0,ex:0}; if(isIncome(r))m[k].in+=amount(r)/1000;else m[k].ex+=amount(r)/1000;});
     const data=Object.values(m).sort((a,b)=>a.idx-b.idx);
     const max=Math.max(1,...data.flatMap(d=>[d.in,d.ex]))*1.1;
+    // คู่สีแท่ง: เขียวเข้ม(รับ)/แดงกุหลาบ(จ่าย) — ต่างความสว่างพอให้คนตาบอดสีแดงเขียวแยกได้
     chart.innerHTML=data.map((d,i)=>`<div class="flex-1 flex items-end justify-center gap-1.5 h-full">
-        <div class="bar w-1/2 max-w-[22px] rounded-t-md bg-green-600" style="height:${d.in/max*100}%;animation-delay:${i*.08}s" title="รายรับ ฿${Math.round(d.in)}K"></div>
-        <div class="bar w-1/2 max-w-[22px] rounded-t-md bg-gold" style="height:${d.ex/max*100}%;animation-delay:${i*.08+.04}s" title="รายจ่าย ฿${Math.round(d.ex)}K"></div>
+        <div class="bar w-1/2 max-w-[22px] rounded-t-md" style="background:#15803D;height:${d.in/max*100}%;animation-delay:${i*.08}s" title="รายรับ ฿${Math.round(d.in)}K"></div>
+        <div class="bar w-1/2 max-w-[22px] rounded-t-md" style="background:#F43F5E;height:${d.ex/max*100}%;animation-delay:${i*.08+.04}s" title="รายจ่าย ฿${Math.round(d.ex)}K"></div>
       </div>`).join('');
     const labels=document.getElementById('chartLabels'); if(labels) labels.innerHTML=data.map(d=>`<span class="flex-1 text-center">${esc(d.label)}</span>`).join('');
     const grid=document.getElementById('chartGrid'); if(grid){let h='';for(let i=0;i<=4;i++){const pct=i/4*100,val=Math.round(max*i/4);
@@ -166,7 +167,7 @@ window.Finance = (function () {
           <span class="font-kanit font-600 text-stone-800 truncate"><i class="fa-solid fa-folder text-gold-dark mr-1.5"></i>${esc(p.name)}</span>
           <span class="font-kanit font-700 shrink-0 ${p.net>=0?'text-green-700':'text-rose-600'}">${p.net>=0?'+':'−'}${baht(Math.abs(p.net))}</span>
         </div>
-        <div class="h-2.5 rounded-full bg-stone-100 overflow-hidden flex"><div style="width:${p.in/tot*100}%" class="bg-green-500"></div><div style="width:${p.ex/tot*100}%" class="bg-rose-400"></div></div>
+        <div class="h-2.5 rounded-full bg-stone-100 overflow-hidden flex"><div style="width:${p.in/tot*100}%;background:#15803D"></div><div style="width:${p.ex/tot*100}%;background:#F43F5E"></div></div>
         <div class="flex justify-between text-[12px] text-stone-400 mt-1"><span>รับ ${baht(p.in)}</span><span>จ่าย ${baht(p.ex)}</span></div>
       </div>`;}).join('');
   }
