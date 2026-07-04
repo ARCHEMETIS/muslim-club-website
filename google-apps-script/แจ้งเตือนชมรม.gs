@@ -2,16 +2,24 @@
    แจ้งเตือนชมรม.gs — Google Apps Script แจ้งเตือนเข้ากลุ่มอัตโนมัติ
    ---------------------------------------------------------------------
    ทำ 2 อย่าง:
-   1. ประกาศใหม่ในชีต "ประกาศกิจกรรม" → แจ้งเข้ากลุ่ม (เช็คทุกชั่วโมง)
-   2. งานฝ่ายใกล้ถึงเดดไลน์/เลยกำหนด ในชีต "ตารางกิจกรรม" → สรุปแจ้งทุกเช้า 08:00
+   1. ประกาศใหม่ในชีต "ประกาศกิจกรรม" → แจ้งเข้ากลุ่ม
+   2. งานฝ่ายใกล้เดดไลน์/เลยกำหนด ในชีต "ตารางกิจกรรม" → สรุปทุกเช้า 08:00
+
+   ★ โหมด LINE OA (ประหยัดโควตาฟรี 300 ข้อความ/เดือน):
+     - LINE นับ push เข้ากลุ่ม "ตามจำนวนคนในกลุ่ม" (กลุ่ม 15 คน = 15 เครดิต/ครั้ง)
+     - แต่ "reply" ฟรีไม่จำกัด → สมาชิกพิมพ์ เดดไลน์/ประกาศ ในกลุ่ม บอทตอบฟรี
+     - ประกาศธรรมดาถูก "พัก" ไว้รวมส่งเป็น digest เดียวตอนเช้า (push 1 ครั้ง/วัน)
+       ยกเว้นประกาศที่มีคำว่า "ด่วน" → push ทันที
+     - มี quota guard: เหลือเครดิตน้อยกว่ากันชน → งดส่งอัตโนมัติ
+   Telegram/Discord ฟรีไม่จำกัด → ส่งสด ๆ ตามปกติ
 
    วิธีติดตั้ง: อ่าน วิธีติดตั้งแจ้งเตือน.md (โฟลเดอร์เดียวกัน)
-   สั้น ๆ: กรอก CONFIG ข้างล่าง → รัน setup() หนึ่งครั้ง → เสร็จ
+   สั้น ๆ: กรอก CONFIG → รัน setup() หนึ่งครั้ง → (LINE: deploy เป็น Web app + ตั้ง webhook)
    ===================================================================== */
 
 const CONFIG = {
   // ---- เลือกช่องทางแจ้งเตือน: 'telegram' | 'discord' | 'line' ----
-  channel: 'telegram',
+  channel: 'line',
 
   telegram: {
     botToken: '',        // จาก @BotFather
@@ -21,8 +29,9 @@ const CONFIG = {
     webhookUrl: '',      // จาก ตั้งค่าช่อง → Integrations → Webhooks
   },
   line: {
-    channelAccessToken: '',  // จาก LINE Developers (Messaging API)
-    to: '',                  // groupId ของกลุ่มที่ดึงบอทเข้า
+    channelAccessToken: '',  // long-lived token จาก LINE Developers (ออกครั้งเดียว ไม่หมดอายุ)
+    to: '',                  // groupId — เว้นว่างได้! ตั้ง webhook แล้วพิมพ์อะไรก็ได้ในกลุ่ม บอทจะจำให้เอง
+    quotaSafety: 30,         // เหลือเครดิตน้อยกว่านี้ = งดส่ง เก็บไว้ให้เรื่องด่วนเดือนหน้า
   },
 
   // ---- ชีตที่ให้สคริปต์อ่าน (เอา ID จากลิงก์ชีต ส่วนที่อยู่หลัง /d/) ----
@@ -37,10 +46,10 @@ const CONFIG = {
 function setup() {
   // ลบตัวตั้งเวลาเก่าของสคริปต์นี้ก่อน (กันซ้ำ)
   ScriptApp.getProjectTriggers().forEach(t => {
-    if (['checkAnnouncements', 'checkDeadlines'].includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
+    if (['checkAnnouncements', 'morningDigest'].includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('checkAnnouncements').timeBased().everyHours(1).create();
-  ScriptApp.newTrigger('checkDeadlines').timeBased().atHour(8).everyDays(1).create();
+  ScriptApp.newTrigger('morningDigest').timeBased().atHour(8).everyDays(1).create();
   // จดจำนวนแถวปัจจุบันไว้เป็นจุดตั้งต้น — ประกาศเก่าจะไม่ถูกแจ้งซ้ำ
   const rows = readRows_(CONFIG.announcements);
   PropertiesService.getScriptProperties().setProperty('annLastRow', String(rows.length));
@@ -52,25 +61,64 @@ function testSend() {
   sendMessage_('🔔 ทดสอบระบบแจ้งเตือนชมรมมุสลิม มข. — ถ้าเห็นข้อความนี้แปลว่าเชื่อมสำเร็จ ✓');
 }
 
-/* ---------- งานที่ 1: ประกาศใหม่ ---------- */
+/* =====================================================================
+   งานที่ 1: ประกาศใหม่ (รันทุกชั่วโมง)
+   - Telegram/Discord: รวมประกาศใหม่ทั้งหมดเป็น 1 ข้อความ ส่งเลย (ฟรี)
+   - LINE: พักเข้าคิวรอ digest ตอนเช้า (ประหยัดเครดิต)
+           ยกเว้นหัวข้อ/หมวดมีคำว่า "ด่วน" → push ทันที
+   ===================================================================== */
 function checkAnnouncements() {
   const rows = readRows_(CONFIG.announcements);
   const props = PropertiesService.getScriptProperties();
   const last = parseInt(props.getProperty('annLastRow') || '0', 10);
   if (rows.length <= last) { props.setProperty('annLastRow', String(rows.length)); return; }
 
-  // แจ้งเฉพาะแถวใหม่ (เพดาน 5 แถวต่อรอบ กันสแปมกลุ่มตอนวางข้อมูลทีละมาก ๆ)
-  rows.slice(last, last + 5).forEach(r => {
-    const title = r['หัวข้อ'] || '(ไม่มีหัวข้อ)';
-    const detail = r['รายละเอียด'] ? '\n' + String(r['รายละเอียด']).slice(0, 200) : '';
-    const cat = r['หมวดหมู่'] ? ' [' + r['หมวดหมู่'] + ']' : '';
-    sendMessage_('📢 ประกาศใหม่' + cat + '\n' + title + detail + '\n\n' + CONFIG.siteUrl);
-  });
+  const fresh = rows.slice(last, last + 10);   // เพดาน 10 แถว/รอบ กันสแปม
   props.setProperty('annLastRow', String(rows.length));
+
+  if (CONFIG.channel !== 'line') {
+    sendMessage_('📢 ประกาศใหม่\n\n' + fresh.map(annLine_).join('\n\n') + '\n\n' + CONFIG.siteUrl);
+    return;
+  }
+
+  // ---- โหมด LINE: ด่วนส่งเลย ที่เหลือเข้าคิว ----
+  const urgent = fresh.filter(r => /ด่วน/.test(String(r['หัวข้อ'] || '') + String(r['หมวดหมู่'] || '')));
+  const normal = fresh.filter(r => !urgent.includes(r));
+  if (urgent.length) sendMessage_('🚨 ประกาศด่วน\n\n' + urgent.map(annLine_).join('\n\n') + '\n\n' + CONFIG.siteUrl);
+  if (normal.length) {
+    const queue = JSON.parse(props.getProperty('annQueue') || '[]');
+    normal.forEach(r => queue.push(annLine_(r)));
+    props.setProperty('annQueue', JSON.stringify(queue.slice(-15)));   // เก็บอย่างมาก 15 เรื่อง
+  }
 }
 
-/* ---------- งานที่ 2: เดดไลน์งานฝ่าย ---------- */
-function checkDeadlines() {
+function annLine_(r) {
+  const cat = r['หมวดหมู่'] ? '[' + r['หมวดหมู่'] + '] ' : '';
+  const detail = r['รายละเอียด'] ? '\n' + String(r['รายละเอียด']).slice(0, 150) : '';
+  return '• ' + cat + (r['หัวข้อ'] || '(ไม่มีหัวข้อ)') + detail;
+}
+
+/* =====================================================================
+   งานที่ 2: สรุปตอนเช้า 08:00 — push เดียวรวมทุกเรื่อง
+   (ประกาศที่ค้างคิว + เดดไลน์งานฝ่าย) · ไม่มีเรื่อง = เงียบ ไม่เปลืองเครดิต
+   ===================================================================== */
+function morningDigest() {
+  const props = PropertiesService.getScriptProperties();
+  const parts = [];
+
+  const queue = JSON.parse(props.getProperty('annQueue') || '[]');
+  if (queue.length) parts.push('📢 ประกาศใหม่:\n' + queue.join('\n\n'));
+
+  const dl = deadlineSummary_();
+  if (dl) parts.push(dl);
+
+  if (!parts.length) return;                       // ไม่มีอะไร = ไม่ส่ง
+  const sent = sendMessage_('🌅 สรุปเช้านี้\n\n' + parts.join('\n\n') + '\n\nดูทั้งหมด: ' + CONFIG.siteUrl);
+  if (sent) props.deleteProperty('annQueue');      // ส่งไม่สำเร็จ (โควตาหมด) → เก็บคิวไว้ก่อน
+}
+
+/* ---------- สรุปเดดไลน์ (ใช้ทั้ง digest และตอบ reply) ---------- */
+function deadlineSummary_() {
   const rows = readRows_(CONFIG.events);
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const soon = [], overdue = [];
@@ -79,18 +127,66 @@ function checkDeadlines() {
     if (String(r['สถานะ'] || '').includes('เสร็จ')) return;
     const d = parseDate_(r['เดดไลน์']); if (!d) return;
     const days = Math.round((d - today) / 86400000);
-    const line = '• ' + (r['ฝ่าย'] || '?') + ' — ' + (r['หน้าที่'] || '?') +
-      ' (' + (r['ชื่อกิจกรรม'] || '') + ')';
+    const line = '• ' + (r['ฝ่าย'] || '?') + ' — ' + (r['หน้าที่'] || '?') + ' (' + (r['ชื่อกิจกรรม'] || '') + ')';
     if (days < 0) overdue.push(line + ' เลยมา ' + (-days) + ' วัน');
     else if (days <= CONFIG.deadlineDaysAhead) soon.push(line + (days === 0 ? ' ⏰ วันนี้!' : ' อีก ' + days + ' วัน'));
   });
 
-  if (!soon.length && !overdue.length) return;   // ไม่มีอะไรใกล้กำหนด = ไม่ต้องส่ง
-  let msg = '📋 สรุปเดดไลน์งานฝ่าย\n';
-  if (overdue.length) msg += '\n🔴 เลยกำหนด:\n' + overdue.join('\n') + '\n';
-  if (soon.length) msg += '\n🟡 ใกล้ถึงกำหนด:\n' + soon.join('\n') + '\n';
-  msg += '\nดูตารางเต็ม: ' + CONFIG.siteUrl;
-  sendMessage_(msg);
+  if (!soon.length && !overdue.length) return '';
+  let msg = '📋 เดดไลน์งานฝ่าย';
+  if (overdue.length) msg += '\n🔴 เลยกำหนด:\n' + overdue.join('\n');
+  if (soon.length) msg += '\n🟡 ใกล้ถึงกำหนด:\n' + soon.join('\n');
+  return msg;
+}
+
+/* =====================================================================
+   Webhook สำหรับ LINE (deploy สคริปต์นี้เป็น Web app แล้วเอา URL ไปวาง)
+   ★ reply ฟรีไม่จำกัด — สมาชิกพิมพ์คำสั่งในกลุ่ม บอทตอบโดยไม่กินโควตาเลย
+     คำสั่ง:  เดดไลน์ · ประกาศ · โควตา · id
+   ★ บอทจำ groupId ของกลุ่มที่คุยด้วยล่าสุดให้อัตโนมัติ (ไม่ต้องหาเอง)
+   ===================================================================== */
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    (data.events || []).forEach(ev => {
+      const src = ev.source || {};
+      const id = src.groupId || src.roomId || src.userId || '';
+      if (src.groupId) PropertiesService.getScriptProperties().setProperty('lineGroupId', src.groupId);
+
+      if (ev.type === 'message' && ev.message && ev.message.type === 'text' && ev.replyToken) {
+        const t = String(ev.message.text).trim().toLowerCase();
+        if (t === 'เดดไลน์' || t === 'deadline')
+          replyLine_(ev.replyToken, deadlineSummary_() || '✅ ไม่มีงานใกล้เดดไลน์ตอนนี้');
+        else if (t === 'ประกาศ' || t === 'news')
+          replyLine_(ev.replyToken, latestAnnouncements_());
+        else if (t === 'โควตา' || t === 'quota')
+          replyLine_(ev.replyToken, quotaReport_());
+        else if (t === 'id')
+          replyLine_(ev.replyToken, 'ID ห้องนี้: ' + id + '\n(บอทจำให้แล้ว ใช้แจ้งเตือนอัตโนมัติได้เลย)');
+      }
+    });
+  } catch (err) { /* กัน webhook ล้ม */ }
+  return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function latestAnnouncements_() {
+  const rows = readRows_(CONFIG.announcements);
+  if (!rows.length) return 'ยังไม่มีประกาศ';
+  return '📢 ประกาศล่าสุด\n\n' + rows.slice(-3).reverse().map(annLine_).join('\n\n') + '\n\n' + CONFIG.siteUrl;
+}
+
+/* ---------- โควตา LINE: เช็คของจริงจาก API (การเช็คไม่กินโควตา) ---------- */
+function lineQuotaLeft_() {
+  const h = { Authorization: 'Bearer ' + CONFIG.line.channelAccessToken };
+  const q = JSON.parse(UrlFetchApp.fetch('https://api.line.me/v2/bot/message/quota', { headers: h }).getContentText());
+  if (q.type !== 'limited') return 999999;   // แพ็กไม่จำกัด
+  const c = JSON.parse(UrlFetchApp.fetch('https://api.line.me/v2/bot/message/quota/consumption', { headers: h }).getContentText());
+  return q.value - c.totalUsage;
+}
+function quotaReport_() {
+  const left = lineQuotaLeft_();
+  return '📊 โควตาข้อความ LINE เดือนนี้\nเหลือ ' + left + ' เครดิต' +
+    '\n(push เข้ากลุ่มกิน 1 เครดิต × จำนวนคนในกลุ่ม · การพิมพ์ถามแบบนี้ฟรีไม่จำกัด)';
 }
 
 /* ---------- ตัวช่วย: อ่านชีตเป็น array ของ object (คีย์ = หัวคอลัมน์) ---------- */
@@ -122,7 +218,7 @@ function parseDate_(v) {
   return null;
 }
 
-/* ---------- ตัวช่วย: ส่งข้อความตามช่องทางที่เลือก ---------- */
+/* ---------- ตัวช่วย: ส่งข้อความตามช่องทางที่เลือก (คืน true = ส่งแล้ว) ---------- */
 function sendMessage_(text) {
   const ch = CONFIG.channel;
   if (ch === 'telegram') {
@@ -131,19 +227,42 @@ function sendMessage_(text) {
       method: 'post', contentType: 'application/json',
       payload: JSON.stringify({ chat_id: c.chatId, text: text }),
     });
-  } else if (ch === 'discord') {
+    return true;
+  }
+  if (ch === 'discord') {
     UrlFetchApp.fetch(CONFIG.discord.webhookUrl, {
       method: 'post', contentType: 'application/json',
       payload: JSON.stringify({ content: text }),
     });
-  } else if (ch === 'line') {
-    const c = CONFIG.line;
-    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
-      method: 'post', contentType: 'application/json',
-      headers: { Authorization: 'Bearer ' + c.channelAccessToken },
-      payload: JSON.stringify({ to: c.to, messages: [{ type: 'text', text: text }] }),
-    });
-  } else {
-    throw new Error('CONFIG.channel ต้องเป็น telegram / discord / line');
+    return true;
   }
+  if (ch === 'line') return pushLine_(text);
+  throw new Error('CONFIG.channel ต้องเป็น telegram / discord / line');
+}
+
+function pushLine_(text) {
+  const c = CONFIG.line;
+  const to = c.to || PropertiesService.getScriptProperties().getProperty('lineGroupId');
+  if (!to) { Logger.log('LINE: ยังไม่รู้ groupId — พิมพ์อะไรก็ได้ในกลุ่ม 1 ครั้งให้บอทจำ'); return false; }
+
+  // ★ quota guard: เหลือน้อยกว่ากันชน → งดส่ง เก็บเครดิตไว้
+  const left = lineQuotaLeft_();
+  if (left <= c.quotaSafety) {
+    Logger.log('LINE: งดส่ง — เครดิตเหลือ ' + left + ' (กันชน ' + c.quotaSafety + ') ข้อความ: ' + text.slice(0, 80));
+    return false;
+  }
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post', contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + c.channelAccessToken },
+    payload: JSON.stringify({ to: to, messages: [{ type: 'text', text: text.slice(0, 4900) }] }),
+  });
+  return true;
+}
+
+function replyLine_(replyToken, text) {   // reply = ฟรี ไม่นับโควตา
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'post', contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + CONFIG.line.channelAccessToken },
+    payload: JSON.stringify({ replyToken: replyToken, messages: [{ type: 'text', text: text.slice(0, 4900) }] }),
+  });
 }
