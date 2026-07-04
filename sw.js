@@ -6,7 +6,7 @@
    คำขอไปเว็บอื่น (Google ชีต/ฟอร์ม, Aladhan API, ฟอนต์) ปล่อยให้สดเสมอ
    ===================================================================== */
 
-const CACHE = 'muslimclub-v1';
+const CACHE = 'muslimclub-v2';
 
 // ไฟล์โครงเว็บที่เก็บไว้ให้เปิดได้แม้ออฟไลน์
 const SHELL = [
@@ -23,7 +23,12 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // เก็บทีละไฟล์ ไฟล์ไหนพลาดก็ข้าม — ไม่ให้ไฟล์เดียวทำให้ติดตั้งล้มทั้งชุด
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => Promise.allSettled(SHELL.map((u) => c.add(u))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -42,12 +47,18 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(req)
       .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        if (res.ok) {                                   // เก็บเฉพาะคำตอบดี — กัน 404/500 ค้างในแคช
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        }
         return res;
       })
       .catch(() =>
-        caches.match(req).then((hit) => hit || caches.match('./index.html'))
+        caches.match(req).then((hit) =>
+          // fallback เป็น index.html เฉพาะตอน "เปิดหน้า" เท่านั้น
+          // (ไฟล์ js/css ที่ไม่มีในแคช ให้ error ตรง ๆ ดีกว่าได้ HTML ไปแทนสคริปต์)
+          hit || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error())
+        )
       )
   );
 });
