@@ -32,13 +32,16 @@ const CONFIG = {
     channelAccessToken: '',  // long-lived token จาก LINE Developers (ออกครั้งเดียว ไม่หมดอายุ)
     to: '',                  // groupId — เว้นว่างได้! ตั้ง webhook แล้วพิมพ์อะไรก็ได้ในกลุ่ม บอทจะจำให้เอง
     quotaSafety: 30,         // เหลือเครดิตน้อยกว่านี้ = งดส่ง เก็บไว้ให้เรื่องด่วนเดือนหน้า
+    // รอบส่ง digest: 0=อา 1=จ 2=อ 3=พ 4=พฤ 5=ศ 6=ส
+    // [1,4] = จันทร์/พฤหัส (เหมาะกลุ่ม 16-25 คน) · [] = ทุกวันที่มีเรื่อง (เหมาะกลุ่ม ≤15 คน)
+    digestDays: [1, 4],
   },
 
   // ---- ชีตที่ให้สคริปต์อ่าน (เอา ID จากลิงก์ชีต ส่วนที่อยู่หลัง /d/) ----
   announcements: { spreadsheetId: '', sheetName: '' },  // sheetName เว้นว่าง = แท็บแรก
   events:        { spreadsheetId: '', sheetName: '' },
 
-  deadlineDaysAhead: 3,    // เตือนล่วงหน้ากี่วัน
+  deadlineDaysAhead: 4,    // เตือนล่วงหน้ากี่วัน (ใช้รอบ จ/พฤ ควร ≥4 ให้ครอบคลุมช่องว่าง พฤ→จ)
   siteUrl: 'https://muslimclub-kku.netlify.app',
 };
 
@@ -103,6 +106,10 @@ function annLine_(r) {
    (ประกาศที่ค้างคิว + เดดไลน์งานฝ่าย) · ไม่มีเรื่อง = เงียบ ไม่เปลืองเครดิต
    ===================================================================== */
 function morningDigest() {
+  // โหมด LINE + ตั้งรอบส่งไว้: วันนี้ไม่ใช่รอบ = ข้าม (คิวประกาศเก็บไว้รอรอบหน้า)
+  if (CONFIG.channel === 'line' && (CONFIG.line.digestDays || []).length) {
+    if (CONFIG.line.digestDays.indexOf(new Date().getDay()) === -1) return;
+  }
   const props = PropertiesService.getScriptProperties();
   const parts = [];
 
