@@ -9,7 +9,13 @@
 window.Finance = (function () {
   const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  const COLORS = ['#14532D','#2E7D32','#C0A062','#D8BF8A','#236026','#A6864A','#0d3b1d'];
+  // ชุดสีโดนัท (ตรวจผ่านเรื่องตาบอดสี/ความต่างของเฉดแล้ว): เข้ม→อ่อน เรียงตามสัดส่วนมาก→น้อย
+  // รายจ่าย = ไล่โทนแดง · รายรับ = ไล่โทนเขียว · หมวดที่เกิน 4 ถูกรวมเป็น "อื่น ๆ" สีเทา
+  const DONUT_RAMP = {
+    expense: ['#9F1239','#E11D48','#F7566E','#FB8FA0'],
+    income:  ['#166534','#169444','#1FBF56','#44D379'],
+  };
+  const DONUT_OTHER = '#A8A29E';
 
   // ตัวอย่าง: โครงการละศีลอดรอมฎอน (เม.ย. มีรายวันให้ดูปฏิทิน) + โครงการอื่น
   const SAMPLE = [
@@ -126,10 +132,19 @@ window.Finance = (function () {
     const subset=rows.filter(r=>exp?!isIncome(r):isIncome(r)); const total=subset.reduce((s,r)=>s+amount(r),0);
     set('finDonutTotal',short(total));
     const cat={}; subset.forEach(r=>{const c=r['หมวดหมู่']||'อื่น ๆ';cat[c]=(cat[c]||0)+amount(r);});
-    const items=Object.entries(cat).map(([name,val])=>({name,val,pct:total?val/total*100:0})).sort((a,b)=>b.val-a.val);
-    if(donut){let acc=0;const stops=items.map((it,i)=>{const f=acc,t=acc+it.pct;acc=t;return `${COLORS[i%COLORS.length]} ${f.toFixed(1)}% ${t.toFixed(1)}%`;}).join(',');
+    let items=Object.entries(cat).map(([name,val])=>({name,val,pct:total?val/total*100:0})).sort((a,b)=>b.val-a.val);
+    const pal=DONUT_RAMP[exp?'expense':'income'];
+    if(items.length>pal.length){                          // หมวดเกินจำนวนสี → รวมท้ายเป็น "อื่น ๆ"
+      const restVal=items.slice(pal.length).reduce((s,x)=>s+x.val,0);
+      items=items.slice(0,pal.length);
+      items.push({name:'อื่น ๆ',val:restVal,pct:total?restVal/total*100:0});
+    }
+    items.forEach((it,i)=>it.color=pal[i]||DONUT_OTHER);
+    if(donut){let acc=0;const stops=items.map(it=>{const f=acc,t=acc+it.pct;acc=t;
+      const g=(it.pct>2&&items.length>1)?0.7:0;           // ร่องขาวคั่นชิ้น อ่านง่าย+ช่วยผู้มีปัญหาการมองสี
+      return `${it.color} ${f.toFixed(1)}% ${(t-g).toFixed(1)}%, #fff ${(t-g).toFixed(1)}% ${t.toFixed(1)}%`;}).join(',');
       donut.style.background=items.length?`conic-gradient(${stops})`:'#e7e5e4';}
-    if(legend) legend.innerHTML=items.length?items.map((it,i)=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${COLORS[i%COLORS.length]}"></span> ${esc(it.name)}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
+    if(legend) legend.innerHTML=items.length?items.map(it=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${it.color}"></span> ${esc(it.name)}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
   }
 
   function renderTable(recent){ const body=document.getElementById('finTxBody'); if(!body)return;
