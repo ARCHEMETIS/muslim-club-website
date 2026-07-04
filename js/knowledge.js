@@ -27,7 +27,7 @@ window.Knowledge = (function () {
   };
   const DEFAULT_TYPE = { icon:'fa-graduation-cap', grad:'from-green-700 to-green-900', cta:'เปิด' };
 
-  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   const typeOf = c => TYPE[c] || DEFAULT_TYPE;
   function driveId(u){ const m=String(u).match(/\/d\/([-\w]{20,})/)||String(u).match(/[?&]id=([-\w]{20,})/)||String(u).match(/^([-\w]{25,})$/); return m?m[1]:null; }
   function imgURL(u){ const id=driveId(u); return id?`https://lh3.googleusercontent.com/d/${id}=w800`:u; }
@@ -56,9 +56,10 @@ window.Knowledge = (function () {
   }
 
   // หาตัวสื่อ: ไฟล์อัป (คอลัมน์ที่ชื่อมี ไฟล์/pdf/เอกสาร/แนบ/file) มาก่อน แล้วค่อย "ลิงก์"
+  // ทุกทางออกต้องเป็น http(s) เท่านั้น — กันลิงก์อันตรายจากชีตหลุดไปเป็นปุ่ม/href
   function resourceOf(k){
     for(const key in k){ if(/ไฟล์|pdf|เอกสาร|แนบ|อัปโหลด|file/i.test(key) && /^https?:/i.test(String(k[key]||''))) return String(k[key]).trim(); }
-    if(k['ลิงก์'] && k['ลิงก์']!=='#') return String(k['ลิงก์']).trim();
+    if(k['ลิงก์'] && k['ลิงก์']!=='#' && /^https?:/i.test(String(k['ลิงก์']).trim())) return String(k['ลิงก์']).trim();
     for(const key in k){ if(/^https?:/i.test(String(k[key]||''))) return String(k[key]).trim(); }
     return '';
   }

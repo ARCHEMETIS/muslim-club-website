@@ -7,7 +7,7 @@
    ===================================================================== */
 
 window.Viewer = (function () {
-  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   function driveId(u){ const m=String(u).match(/\/d\/([-\w]{20,})/)||String(u).match(/[?&]id=([-\w]{20,})/); return m?m[1]:null; }
   function ytId(u){ const m=String(u).match(/(?:youtu\.be\/|v=|\/embed\/)([-\w]{11})/); return m?m[1]:null; }
   const isImg = u => /\.(jpe?g|png|gif|webp|bmp)(\?|#|$)/i.test(String(u));
@@ -36,6 +36,7 @@ window.Viewer = (function () {
 
   function open(url, title){
     url=String(url||'').trim(); if(!url) return;
+    if(!window.safeHttp(url)) return;                 // ยอมเฉพาะ http(s) — กัน javascript:/data:
     if(!previewable(url)){ window.open(url,'_blank','noopener'); return; }   // ลิงก์ทั่วไป → แท็บใหม่
     ensure();
     document.getElementById('vwTitle').textContent = title || 'เอกสาร';

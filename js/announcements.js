@@ -28,8 +28,7 @@ window.Announcements = (function () {
   };
   const DEFAULT_STYLE = { grad:'from-green-700 to-green-900', icon:'fa-bullhorn', badge:'text-green-800' };
 
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   const styleOf = c => STYLE[c] || DEFAULT_STYLE;
 
   // แปลงลิงก์รูปจาก Google ไดรฟ์ → ลิงก์รูปที่แสดงบนเว็บได้ (ใช้ endpoint thumbnail)
@@ -72,7 +71,7 @@ window.Announcements = (function () {
 
   function card(a) {
     const more = moreLinkOf(a);
-    const link = more && more !== '#'
+    const link = more && more !== '#' && window.safeHttp(more)   // เฉพาะ http(s) — กันลิงก์แฝงจากชีต
       ? `<a href="${esc(more)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-green-700 font-kanit font-500 mt-4 hover:gap-3 transition-all">อ่านต่อ <i class="fa-solid fa-arrow-right text-xs"></i></a>`
       : '';
     return `<article class="lift bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">

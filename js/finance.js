@@ -42,8 +42,9 @@ window.Finance = (function () {
   const projOf = r => r['โครงการ'] || 'งานประจำชมรม';
   const whoOf  = r => pick(r,['ผู้รับผิดชอบ','ผู้รับ','ผู้เบิก','ผู้จ่าย','responsible']);              // ผู้รับ/ผู้เบิก
   const evidOf = r => pick(r,['หลักฐาน','ใบเสร็จ','รูปใบเสร็จ','แนบไฟล์','receipt','evidence']) || pick(r, Object.keys(r).filter(k=>/^https?:/i.test(String(r[k]||''))));
-  // ลิงก์หลักฐาน: ถ้าเป็นไดรฟ์ → เปิดหน้าดูไฟล์ ไม่งั้นใช้ลิงก์ตรง
-  function evidLink(u){ u=String(u||'').trim(); const m=u.match(/\/d\/([-\w]{20,})/)||u.match(/[?&]id=([-\w]{20,})/); return m?`https://drive.google.com/file/d/${m[1]}/view`:u; }
+  // ลิงก์หลักฐาน: ถ้าเป็นไดรฟ์ → เปิดหน้าดูไฟล์ ไม่งั้นใช้ลิงก์ตรง (เฉพาะ http(s))
+  function evidLink(u){ u=String(u||'').trim(); const m=u.match(/\/d\/([-\w]{20,})/)||u.match(/[?&]id=([-\w]{20,})/); if(m) return `https://drive.google.com/file/d/${m[1]}/view`; return window.safeHttp(u)?u:''; }
+  const esc = window.esc;
   const baht = n => '฿' + Math.round(n).toLocaleString('th-TH');
   const short = n => n>=1000 ? '฿'+Math.round(n/1000)+'K' : '฿'+Math.round(n);
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
@@ -82,8 +83,8 @@ window.Finance = (function () {
   function fillFilters(){
     const ys=document.getElementById('finYear'),cs=document.getElementById('finCat'),ps=document.getElementById('finProject');
     if(ys) ys.innerHTML=`<option value="all">ทุกปี</option>`+years().map(y=>`<option value="${y}" ${fYear==String(y)?'selected':''}>ปี ${y+543}</option>`).join('');
-    if(cs) cs.innerHTML=`<option value="all">ทุกหมวด</option>`+cats().map(c=>`<option value="${c}" ${fCat===c?'selected':''}>${c}</option>`).join('');
-    if(ps) ps.innerHTML=`<option value="all">ทุกโครงการ</option>`+projects().map(p=>`<option value="${p}" ${fProject===p?'selected':''}>${p}</option>`).join('');
+    if(cs) cs.innerHTML=`<option value="all">ทุกหมวด</option>`+cats().map(c=>`<option value="${esc(c)}" ${fCat===c?'selected':''}>${esc(c)}</option>`).join('');
+    if(ps) ps.innerHTML=`<option value="all">ทุกโครงการ</option>`+projects().map(p=>`<option value="${esc(p)}" ${fProject===p?'selected':''}>${esc(p)}</option>`).join('');
   }
 
   // ---------- การ์ดสรุป / กราฟ / โดนัท / ตาราง ----------
@@ -110,7 +111,7 @@ window.Finance = (function () {
         <div class="bar w-1/2 max-w-[22px] rounded-t-md bg-green-600" style="height:${d.in/max*100}%;animation-delay:${i*.08}s" title="รายรับ ฿${Math.round(d.in)}K"></div>
         <div class="bar w-1/2 max-w-[22px] rounded-t-md bg-gold" style="height:${d.ex/max*100}%;animation-delay:${i*.08+.04}s" title="รายจ่าย ฿${Math.round(d.ex)}K"></div>
       </div>`).join('');
-    const labels=document.getElementById('chartLabels'); if(labels) labels.innerHTML=data.map(d=>`<span class="flex-1 text-center">${d.label}</span>`).join('');
+    const labels=document.getElementById('chartLabels'); if(labels) labels.innerHTML=data.map(d=>`<span class="flex-1 text-center">${esc(d.label)}</span>`).join('');
     const grid=document.getElementById('chartGrid'); if(grid){let h='';for(let i=0;i<=4;i++){const pct=i/4*100,val=Math.round(max*i/4);
       h+=`<div style="position:absolute;left:0;right:0;bottom:${pct}%;border-top:1px dashed #ececec;"><span style="position:absolute;left:-2.6rem;top:-0.62em;width:2.2rem;text-align:right;font-size:11px;color:#a8a29e;">${val}K</span></div>`;}grid.innerHTML=h;}
   }
@@ -128,14 +129,14 @@ window.Finance = (function () {
     const items=Object.entries(cat).map(([name,val])=>({name,val,pct:total?val/total*100:0})).sort((a,b)=>b.val-a.val);
     if(donut){let acc=0;const stops=items.map((it,i)=>{const f=acc,t=acc+it.pct;acc=t;return `${COLORS[i%COLORS.length]} ${f.toFixed(1)}% ${t.toFixed(1)}%`;}).join(',');
       donut.style.background=items.length?`conic-gradient(${stops})`:'#e7e5e4';}
-    if(legend) legend.innerHTML=items.length?items.map((it,i)=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${COLORS[i%COLORS.length]}"></span> ${it.name}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
+    if(legend) legend.innerHTML=items.length?items.map((it,i)=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${COLORS[i%COLORS.length]}"></span> ${esc(it.name)}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
   }
 
   function renderTable(recent){ const body=document.getElementById('finTxBody'); if(!body)return;
     body.innerHTML=recent.length?recent.map(r=>{const inc=isIncome(r),st=txIcon(r),amt=(inc?'+ ':'– ')+baht(amount(r));
-      const ev=evidOf(r);
-      const evCell = ev ? `<a href="${evidLink(ev)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>` : '<span class="text-stone-300">—</span>';
-      return `<tr class="hover:bg-green-50/40 transition"><td class="px-6 py-4 flex items-center gap-3"><span class="w-9 h-9 rounded-lg ${st.box} grid place-items-center"><i class="fa-solid ${st.icon} text-sm"></i></span> ${desc(r)}</td><td class="px-6 py-4 text-stone-500">${r['หมวดหมู่']||''}</td><td class="px-6 py-4 text-stone-500">${whoOf(r)||'<span class="text-stone-300">—</span>'}</td><td class="px-6 py-4 text-stone-500">${r['วันที่']||''}</td><td class="px-6 py-4 text-right font-kanit font-600 ${inc?'text-green-600':'text-rose-500'}">${amt}</td><td class="px-6 py-4 text-center">${evCell}</td></tr>`;
+      const evUrl=evidLink(evidOf(r));
+      const evCell = evUrl ? `<a href="${esc(evUrl)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>` : '<span class="text-stone-300">—</span>';
+      return `<tr class="hover:bg-green-50/40 transition"><td class="px-6 py-4 flex items-center gap-3"><span class="w-9 h-9 rounded-lg ${st.box} grid place-items-center"><i class="fa-solid ${st.icon} text-sm"></i></span> ${esc(desc(r))}</td><td class="px-6 py-4 text-stone-500">${esc(r['หมวดหมู่']||'')}</td><td class="px-6 py-4 text-stone-500">${esc(whoOf(r))||'<span class="text-stone-300">—</span>'}</td><td class="px-6 py-4 text-stone-500">${esc(r['วันที่']||'')}</td><td class="px-6 py-4 text-right font-kanit font-600 ${inc?'text-green-600':'text-rose-500'}">${amt}</td><td class="px-6 py-4 text-center">${evCell}</td></tr>`;
     }).join(''):`<tr><td colspan="6" class="px-6 py-10 text-center text-stone-400">ไม่มีรายการในเงื่อนไขที่เลือก</td></tr>`; }
 
   // ---------- สรุปแยกตามโครงการ ----------
@@ -147,7 +148,7 @@ window.Finance = (function () {
     box.innerHTML=items.map(p=>{const tot=p.in+p.ex||1;
       return `<div>
         <div class="flex items-center justify-between mb-1.5 gap-2">
-          <span class="font-kanit font-600 text-stone-800 truncate"><i class="fa-solid fa-folder text-gold-dark mr-1.5"></i>${p.name}</span>
+          <span class="font-kanit font-600 text-stone-800 truncate"><i class="fa-solid fa-folder text-gold-dark mr-1.5"></i>${esc(p.name)}</span>
           <span class="font-kanit font-700 shrink-0 ${p.net>=0?'text-green-700':'text-rose-600'}">${p.net>=0?'+':'−'}${baht(Math.abs(p.net))}</span>
         </div>
         <div class="h-2.5 rounded-full bg-stone-100 overflow-hidden flex"><div style="width:${p.in/tot*100}%" class="bg-green-500"></div><div style="width:${p.ex/tot*100}%" class="bg-rose-400"></div></div>
@@ -193,11 +194,11 @@ window.Finance = (function () {
     if(!b){ box.innerHTML=''; return; }
     box.innerHTML=`<div class="bg-stone-50 rounded-xl p-4 sm:p-5">
       <p class="font-kanit font-600 text-green-900 mb-3 flex items-center gap-2"><i class="fa-regular fa-calendar-check text-gold-dark"></i> รายการวันที่ ${calSel} ${MONTHS_FULL[calM]} ${calY+543}</p>
-      <div class="divide-y divide-stone-200/70">${b.items.map(it=>{const inc=isIncome(it); const ev=evidOf(it), who=whoOf(it);
-        const meta=[it['โครงการ'],it['หมวดหมู่'],who?'โดย '+who:''].filter(Boolean).join(' · ');
-        const evBtn=ev?`<a href="${evidLink(ev)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>`:'';
+      <div class="divide-y divide-stone-200/70">${b.items.map(it=>{const inc=isIncome(it); const evUrl=evidLink(evidOf(it)), who=whoOf(it);
+        const meta=[it['โครงการ'],it['หมวดหมู่'],who?'โดย '+who:''].filter(Boolean).map(esc).join(' · ');
+        const evBtn=evUrl?`<a href="${esc(evUrl)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>`:'';
         return `<div class="flex items-center justify-between py-2.5 gap-3">
-          <div class="min-w-0"><p class="font-kanit font-500 text-stone-800 truncate">${desc(it)}</p><p class="text-[12px] text-stone-400">${meta}</p></div>
+          <div class="min-w-0"><p class="font-kanit font-500 text-stone-800 truncate">${esc(desc(it))}</p><p class="text-[12px] text-stone-400">${meta}</p></div>
           <div class="flex items-center gap-2 shrink-0"><span class="font-kanit font-600 ${inc?'text-green-600':'text-rose-500'}">${inc?'+ ':'– '}${baht(amount(it))}</span>${evBtn}</div>
         </div>`;}).join('')}</div>
       <div class="flex justify-between mt-3 pt-3 border-t border-stone-200 text-sm font-kanit font-600">
@@ -226,7 +227,6 @@ window.Finance = (function () {
   function printReport(){ buildReport(); window.print(); }
   function buildReport(){
     const box=document.getElementById('finReport'); if(!box) return;
-    const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const rows=filtered().slice().sort((a,b)=>(parseDate(a['วันที่'])||0)-(parseDate(b['วันที่'])||0));
     const income=rows.filter(isIncome).reduce((s,r)=>s+amount(r),0);
     const expense=rows.filter(r=>!isIncome(r)).reduce((s,r)=>s+amount(r),0);
@@ -305,7 +305,6 @@ window.Finance = (function () {
     if(!wrap||!list) return;
     if(!LEDGERS.length){ wrap.classList.add('hidden'); return; }
     wrap.classList.remove('hidden');
-    const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     list.innerHTML=LEDGERS.map((L,i)=>`<div class="border border-stone-100 rounded-xl overflow-hidden">
       <div class="flex items-center justify-between gap-3 p-4 bg-stone-50/60 flex-wrap">
         <span class="font-kanit font-600 text-stone-700"><i class="fa-solid fa-folder-closed text-gold-dark mr-2"></i>${esc(L.label)} <span class="text-[12px] text-stone-400 font-400">· ปิดบัญชีแล้ว</span></span>

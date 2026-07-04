@@ -21,7 +21,7 @@ window.Events = (function () {
     { 'ชื่อกิจกรรม':'โครงการละศีลอดสัมพันธ์', 'วันที่':'10/4/2026', 'สถานที่':'มัสยิด มอดินแดง', 'รายละเอียด':'ละศีลอดร่วมกันตลอดเดือนรอมฎอน', 'ฝ่าย':'ฝ่ายการกุศล', 'หน้าที่':'จัดเตรียมอาหาร', 'เดดไลน์':'', 'สถานะ':'เสร็จ' },
   ];
 
-  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const esc = window.esc;
 
   function parseDate(s){ s=String(s||'').trim();
     if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);

@@ -5,7 +5,7 @@
 
 (function () {
   const C = (window.CONFIG && CONFIG.content) || {};
-  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const esc = window.esc;
   const setText = (id, v) => { const el = document.getElementById(id); if (el && v != null && v !== '') el.textContent = v; };
 
   setText('c-club', C.clubName);

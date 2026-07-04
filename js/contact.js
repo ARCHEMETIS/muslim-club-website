@@ -8,7 +8,7 @@
   const C = (window.CONFIG && CONFIG.contact) || {};
   const F = (window.CONFIG && CONFIG.forms) || {};
 
-  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   const txt = (id, v) => { const el = document.getElementById(id); if (el && v) el.textContent = v; };
 
   // ---------- ข้อมูลติดต่อ ----------

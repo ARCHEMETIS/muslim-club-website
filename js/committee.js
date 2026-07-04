@@ -17,7 +17,7 @@ window.Committee = (function () {
   ];
   const GRAD = ['from-green-700 to-green-900', 'from-gold to-gold-dark', 'from-green-600 to-green-800', 'from-green-800 to-green-950'];
 
-  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   function driveId(u){ u=String(u||'').trim(); const m=u.match(/\/d\/([-\w]{20,})/)||u.match(/[?&]id=([-\w]{20,})/)||u.match(/^([-\w]{25,})$/); return m?m[1]:null; }
   function imgURL(u){ const id=driveId(u); return id?`https://lh3.googleusercontent.com/d/${id}=w400`:u; }
   // อ่านค่าจากชื่อคอลัมน์ที่ตรง หรือ "ชื่อใกล้เคียง" — ไม่สนตัวพิมพ์ใหญ่/เล็ก

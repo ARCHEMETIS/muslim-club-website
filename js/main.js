@@ -3,6 +3,18 @@
    (ปกติไม่ต้องแก้ไฟล์นี้)
    ===================================================================== */
 
+// ---------- ตัวช่วยกลาง: กันโค้ดแฝงมากับข้อมูลชีต (ทุกไฟล์ js/ เรียกใช้) ----------
+// esc: escape ข้อความก่อนใส่ HTML/attribute (รวม ' เผื่อใช้ใน onclick="fn('...')")
+window.esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+// safeHttp: ยอมเฉพาะลิงก์ http(s) ก่อนเอาไปใส่ href / iframe / window.open
+// (กันลิงก์อันตรายแบบ javascript: หรือ data: ที่อาจถูกกรอกมาในชีต/ฟอร์ม)
+window.safeHttp = u => {
+  try { const p = new URL(String(u), location.href).protocol; return p === 'http:' || p === 'https:'; }
+  catch { return false; }
+};
+
 // ---------- สลับหน้า (เว็บหน้าเดียว) ----------
 function showPage(name, e) {
   if (e) e.preventDefault();

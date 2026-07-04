@@ -33,7 +33,7 @@ window.Documents = (function () {
   let docs = SAMPLE.slice();
   let fYear = 'all', fTerm = 'all', sortBy = 'new', term = '';
 
-  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const esc = window.esc;
   const styleOf = t => FILE_STYLE[String(t||'').toUpperCase().trim()] || DEFAULT_STYLE;
   const projOf = d => d['โครงการ'] || 'เอกสารทั่วไป';
   const yearOf = d => d['ปีการศึกษา'] || '';
@@ -83,7 +83,7 @@ window.Documents = (function () {
     const lk=linkOf(d), ty=typeOf(d), dt=dateOf(d);
     const st=styleOf(ty);
     const meta=[ty,d['ขนาด'],dt?'อัปเดต '+dt:''].filter(Boolean).map(esc).join(' · ');
-    const has=lk&&lk!=='#';
+    const has=!!(lk&&lk!=='#'&&window.safeHttp(lk));   // เฉพาะลิงก์ http(s) — กันลิงก์แฝงจากชีต
     const preview=has?`<a href="${esc(viewLink(lk))}" target="_blank" rel="noopener" title="ดูตัวอย่าง" class="shrink-0 w-10 h-10 rounded-full border border-stone-200 text-stone-500 hover:border-green-300 hover:text-green-700 grid place-items-center transition"><i class="fa-solid fa-eye text-sm"></i></a>`:'';
     const dl=has?esc(dlLink(lk)):'#', tgt=has?' target="_blank" rel="noopener"':'';
     return `<div class="group flex items-center gap-4 p-4 sm:p-5 hover:bg-green-50/50 transition">
