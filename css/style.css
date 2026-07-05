@@ -47,3 +47,10 @@ html { scroll-behavior: smooth; }
   /* slim scrollbar for prayer card on mobile */
   .no-scrollbar::-webkit-scrollbar { display:none; }
   .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+
+  /* ---------- การตัดบรรทัดภาษาไทย (อ่านง่ายขึ้นบนมือถือ) ---------- */
+  /* หัวข้อ: เกลี่ยความยาวแต่ละบรรทัดให้สมดุล ไม่เหลือคำโดดท้ายบรรทัด
+     ย่อหน้า: ให้เบราว์เซอร์เลือกจุดตัดคำที่สวยขึ้น
+     (เบราว์เซอร์เก่าที่ไม่รู้จักคุณสมบัตินี้จะข้ามไปเฉย ๆ ไม่มีผลเสีย) */
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
