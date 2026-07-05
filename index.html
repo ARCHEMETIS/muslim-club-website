@@ -54,6 +54,7 @@
       <a href="#" data-page="archive" onclick="showPage('archive',event)" class="nav-link transition-colors hover:text-green-700">คลังเอกสาร</a>
       <a href="#" data-page="knowledge" onclick="showPage('knowledge',event)" class="nav-link transition-colors hover:text-green-700">คลังความรู้</a>
       <a href="#" data-page="events" onclick="showPage('events',event)" class="nav-link transition-colors hover:text-green-700">กิจกรรม</a>
+      <a href="#" data-page="gallery" onclick="showPage('gallery',event)" class="nav-link transition-colors hover:text-green-700">แกลเลอรี</a>
       <a href="#" data-page="finance" onclick="showPage('finance',event)" class="nav-link transition-colors hover:text-green-700">การเงิน</a>
       <a href="#" data-page="contact" onclick="showPage('contact',event)" class="nav-link transition-colors hover:text-green-700">ติดต่อเรา</a>
       <a href="#" onclick="showPage('contact',event)" class="ml-1 inline-flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-full text-[14px] shadow-sm hover:shadow-md transition-all">
@@ -74,6 +75,7 @@
       <a href="#" onclick="showPage('archive',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-folder-open w-5 text-gold-dark"></i> คลังเอกสาร</a>
       <a href="#" onclick="showPage('knowledge',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-book-open-reader w-5 text-gold-dark"></i> คลังความรู้</a>
       <a href="#" onclick="showPage('events',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-calendar-days w-5 text-gold-dark"></i> กิจกรรม</a>
+      <a href="#" onclick="showPage('gallery',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-images w-5 text-gold-dark"></i> แกลเลอรี</a>
       <a href="#" onclick="showPage('finance',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-chart-column w-5 text-gold-dark"></i> การเงิน</a>
       <a href="#" onclick="showPage('contact',event)" class="py-3 px-3 rounded-lg hover:bg-green-50 flex items-center gap-3"><i class="fa-solid fa-envelope w-5 text-gold-dark"></i> ติดต่อเรา</a>
       <a href="#" onclick="showPage('contact',event)" class="mt-2 mb-1 text-center bg-green-800 text-white py-3 rounded-full">เข้าร่วมชมรม</a>
@@ -265,6 +267,23 @@
 <!-- ========================================================= -->
 <!-- ===================== FINANCE PAGE ====================== -->
 <!-- ========================================================= -->
+<!-- ═══════════════ แกลเลอรีภาพกิจกรรม ═══════════════ -->
+<section id="page-gallery" class="page">
+  <div class="bg-green-900 relative overflow-hidden">
+    <div class="absolute inset-0 islamic-pattern" style="opacity:.08"></div>
+    <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-14 text-white">
+      <span class="font-kanit text-gold-light text-[13px] tracking-[0.25em] font-500">PHOTO GALLERY</span>
+      <h1 class="font-kanit font-600 text-3xl sm:text-4xl mt-2">แกลเลอรีภาพกิจกรรม</h1>
+      <p class="text-white/70 mt-2 max-w-2xl">รวมภาพความทรงจำจากทุกกิจกรรมของชมรม — กดเข้าอัลบั้มเพื่อดูรูปทั้งหมด หารูปตัวเองได้เลย</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+    <p id="galCount" class="text-sm text-stone-400 font-kanit mb-6"></p>
+    <div id="galList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+  </div>
+</section>
+
 <section id="page-finance" class="page">
   <div class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-9">
@@ -488,6 +507,7 @@
         <li><a href="#" onclick="showPage('archive',event)" class="hover:text-gold-light transition">คลังเอกสาร</a></li>
         <li><a href="#" onclick="showPage('knowledge',event)" class="hover:text-gold-light transition">คลังความรู้</a></li>
         <li><a href="#" onclick="showPage('events',event)" class="hover:text-gold-light transition">กิจกรรม</a></li>
+        <li><a href="#" onclick="showPage('gallery',event)" class="hover:text-gold-light transition">แกลเลอรี</a></li>
         <li><a href="#" onclick="showPage('finance',event)" class="hover:text-gold-light transition">การเงิน</a></li>
         <li><a href="#" onclick="showPage('contact',event)" class="hover:text-gold-light transition">ติดต่อเรา</a></li>
       </ul>
@@ -527,9 +547,10 @@
 <script src="js/main.js?v=2"></script>
 <script src="js/content.js?v=2"></script>
 <script src="js/prayer.js?v=2"></script>
-<script src="js/viewer.js?v=2"></script>
+<script src="js/viewer.js?v=3"></script>
 <script src="js/documents.js?v=5"></script>
 <script src="js/knowledge.js?v=4"></script>
+<script src="js/gallery.js?v=1"></script>
 <script src="js/events.js?v=4"></script>
 <script src="js/finance.js?v=12"></script>
 <script src="js/announcements.js?v=7"></script>

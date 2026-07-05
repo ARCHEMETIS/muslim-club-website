@@ -9,10 +9,11 @@
 window.Viewer = (function () {
   const esc = window.esc;
   function driveId(u){ const m=String(u).match(/\/d\/([-\w]{20,})/)||String(u).match(/[?&]id=([-\w]{20,})/); return m?m[1]:null; }
+  function folderId(u){ const m=String(u).match(/\/folders\/([-\w]{20,})/); return m?m[1]:null; }   // โฟลเดอร์ไดรฟ์ (อัลบั้มรูป)
   function ytId(u){ const m=String(u).match(/(?:youtu\.be\/|v=|\/embed\/)([-\w]{11})/); return m?m[1]:null; }
   const isImg = u => /\.(jpe?g|png|gif|webp|bmp)(\?|#|$)/i.test(String(u));
   const isPdf = u => /\.pdf(\?|#|$)/i.test(String(u));
-  function previewable(u){ return !!(driveId(u) || ytId(u) || isImg(u) || isPdf(u)); }
+  function previewable(u){ return !!(folderId(u) || driveId(u) || ytId(u) || isImg(u) || isPdf(u)); }
 
   let root;
   function ensure(){
@@ -41,10 +42,13 @@ window.Viewer = (function () {
     ensure();
     document.getElementById('vwTitle').textContent = title || 'เอกสาร';
     const body=document.getElementById('vwBody'), foot=document.getElementById('vwFoot');
-    const id=driveId(url), yt=ytId(url);
+    const fid=folderId(url), id=driveId(url), yt=ytId(url);
     let openUrl=url, dl='';
 
-    if(id){
+    if(fid){   // โฟลเดอร์ไดรฟ์ → ตารางรูปทั้งอัลบั้ม เปิดดูในเว็บได้เลย
+      body.innerHTML=`<iframe src="https://drive.google.com/embeddedfolderview?id=${fid}#grid" class="w-full h-full" style="border:0"></iframe>`;
+      openUrl=`https://drive.google.com/drive/folders/${fid}`;
+    } else if(id){
       body.innerHTML=`<iframe src="https://drive.google.com/file/d/${id}/preview" class="w-full h-full" style="border:0" allow="autoplay"></iframe>`;
       openUrl=`https://drive.google.com/file/d/${id}/view`;
       dl=`https://drive.google.com/uc?export=download&id=${id}`;
