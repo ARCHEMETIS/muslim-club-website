@@ -43,6 +43,13 @@ const CONFIG = {
 
   deadlineDaysAhead: 4,    // เตือนล่วงหน้ากี่วัน (ใช้รอบ จ/พฤ ควร ≥4 ให้ครอบคลุมช่องว่าง พฤ→จ)
   siteUrl: 'https://muslimclub-kku.netlify.app',
+
+  // ลิงก์เพิ่มเติมที่บอทจะตอบเมื่อพิมพ์ "ลิงก์" ในกลุ่ม (เติม/ลบได้ตามใจ)
+  // "พื้นที่ทีมงาน" ถูกใส่ให้อัตโนมัติจาก siteUrl — ไม่ต้องเพิ่มเอง
+  quickLinks: {
+    // 'ชีตตารางกิจกรรม (ติ๊กสถานะ)': 'https://docs.google.com/spreadsheets/d/...',
+    // 'ชีตการเงิน': 'https://docs.google.com/spreadsheets/d/...',
+  },
 };
 
 /* ---------- รันครั้งเดียวตอนติดตั้ง: ตั้งเวลาอัตโนมัติ ---------- */
@@ -168,12 +175,22 @@ function doPost(e) {
           replyLine_(ev.replyToken, latestAnnouncements_());
         else if (t === 'โควตา' || t === 'quota')
           replyLine_(ev.replyToken, quotaReport_());
+        else if (t === 'ลิงก์' || t === 'ลิ้ง' || t === 'ฟอร์ม' || t === 'link' || t === 'form')
+          replyLine_(ev.replyToken, quickLinksReport_());
         else if (t === 'id')
           replyLine_(ev.replyToken, 'ID ห้องนี้: ' + id + '\n(บอทจำให้แล้ว ใช้แจ้งเตือนอัตโนมัติได้เลย)');
       }
     });
   } catch (err) { /* กัน webhook ล้ม */ }
   return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+}
+
+// รวมลิงก์งานทีม — พิมพ์ "ลิงก์" ในกลุ่มแล้วบอทตอบ (ไม่ต้องงมหาลิงก์กันอีก)
+function quickLinksReport_() {
+  let msg = '🔗 ลิงก์งานทีม\n\n• พื้นที่ทีมงาน (รวมฟอร์มทุกใบ):\n' + CONFIG.siteUrl.replace(/\/+$/, '') + '/team.html';
+  const q = CONFIG.quickLinks || {};
+  for (const name in q) { if (q[name]) msg += '\n\n• ' + name + ':\n' + q[name]; }
+  return msg;
 }
 
 function latestAnnouncements_() {
