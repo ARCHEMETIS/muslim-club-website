@@ -48,6 +48,9 @@ window.Finance = (function () {
   const projOf = r => r['โครงการ'] || 'งานประจำชมรม';
   const whoOf  = r => pick(r,['ผู้รับผิดชอบ','ผู้รับ','ผู้เบิก','ผู้จ่าย','responsible']);              // ผู้รับ/ผู้เบิก
   const evidOf = r => pick(r,['หลักฐาน','ใบเสร็จ','รูปใบเสร็จ','แนบไฟล์','receipt','evidence']) || pick(r, Object.keys(r).filter(k=>/^https?:/i.test(String(r[k]||''))));
+  // หลักฐานหลายไฟล์ต่อรายการได้ (เช่น สลิปโอน + ใบเสร็จร้าน):
+  // ฟอร์มอัปโหลดหลายไฟล์จะคั่นลิงก์ด้วยจุลภาคในเซลล์เดียว / วางเองหลายลิงก์คั่น , หรือขึ้นบรรทัดก็ได้
+  const evidList = r => [...new Set(String(evidOf(r)||'').split(/[\s,]+/).map(evidLink).filter(Boolean))];
   // ลิงก์หลักฐาน: ถ้าเป็นไดรฟ์ → เปิดหน้าดูไฟล์ ไม่งั้นใช้ลิงก์ตรง (เฉพาะ http(s))
   function evidLink(u){ u=String(u||'').trim(); const m=u.match(/\/d\/([-\w]{20,})/)||u.match(/[?&]id=([-\w]{20,})/); if(m) return `https://drive.google.com/file/d/${m[1]}/view`; return window.safeHttp(u)?u:''; }
   const esc = window.esc;
@@ -149,6 +152,19 @@ window.Finance = (function () {
     if(legend) legend.innerHTML=items.length?items.map(it=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${it.color}"></span> ${esc(it.name)}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
   }
 
+  // ปุ่มดูหลักฐาน 🧾 — หลายไฟล์ = หลายปุ่มมีเลขกำกับ · กดแล้วเปิดดูในเว็บ (Viewer) ไม่เด้งออก
+  function evidBtns_(r){
+    const evs=evidList(r); if(!evs.length) return '';
+    const cls='inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition';
+    return `<span class="inline-flex items-center justify-center gap-1 flex-wrap">`+evs.map((u,i)=>{
+      const num=evs.length>1?`<span class="text-[10px] font-kanit font-600 ml-0.5">${i+1}</span>`:'';
+      const title=`ดูหลักฐาน${evs.length>1?' ใบที่ '+(i+1):''}`;
+      return (window.Viewer&&Viewer.previewable(u))
+        ? `<button type="button" data-url="${esc(u)}" data-title="${esc('หลักฐาน: '+desc(r))}" onclick="Viewer.fromBtn(this)" title="${title}" class="${cls} cursor-pointer"><i class="fa-solid fa-receipt text-sm"></i>${num}</button>`
+        : `<a href="${esc(u)}" target="_blank" rel="noopener" title="${title}" class="${cls}"><i class="fa-solid fa-receipt text-sm"></i>${num}</a>`;
+    }).join('')+`</span>`;
+  }
+
   // ตารางรายการ: ปกติโชว์ 6 รายการล่าสุด · กด "ดูทั้งหมด" = โชว์ทุกรายการตามตัวกรอง
   function renderTable(all){ const body=document.getElementById('finTxBody'); if(!body)return;
     const recent = showAllTx ? all : all.slice(0,6);
@@ -158,8 +174,7 @@ window.Finance = (function () {
       toggle.textContent = showAllTx ? 'แสดงย่อ' : `ดูทั้งหมด (${all.length} รายการ)`;
     }
     body.innerHTML=recent.length?recent.map(r=>{const inc=isIncome(r),st=txIcon(r),amt=(inc?'+ ':'– ')+baht(amount(r));
-      const evUrl=evidLink(evidOf(r));
-      const evCell = evUrl ? `<a href="${esc(evUrl)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>` : '<span class="text-stone-300">—</span>';
+      const evCell = evidBtns_(r) || '<span class="text-stone-300">—</span>';
       return `<tr class="hover:bg-green-50/40 transition"><td class="px-6 py-4 flex items-center gap-3"><span class="w-9 h-9 rounded-lg ${st.box} grid place-items-center"><i class="fa-solid ${st.icon} text-sm"></i></span> ${esc(desc(r))}</td><td class="px-6 py-4 text-stone-500">${esc(r['หมวดหมู่']||'')}</td><td class="px-6 py-4 text-stone-500">${esc(whoOf(r))||'<span class="text-stone-300">—</span>'}</td><td class="px-6 py-4 text-stone-500">${esc(r['วันที่']||'')}</td><td class="px-6 py-4 text-right font-kanit font-600 ${inc?'text-green-600':'text-rose-500'}">${amt}</td><td class="px-6 py-4 text-center">${evCell}</td></tr>`;
     }).join(''):`<tr><td colspan="6" class="px-6 py-10 text-center text-stone-400">ไม่มีรายการในเงื่อนไขที่เลือก</td></tr>`; }
 
@@ -218,9 +233,9 @@ window.Finance = (function () {
     if(!b){ box.innerHTML=''; return; }
     box.innerHTML=`<div class="bg-stone-50 rounded-xl p-4 sm:p-5">
       <p class="font-kanit font-600 text-green-900 mb-3 flex items-center gap-2"><i class="fa-regular fa-calendar-check text-gold-dark"></i> รายการวันที่ ${calSel} ${MONTHS_FULL[calM]} ${calY+543}</p>
-      <div class="divide-y divide-stone-200/70">${b.items.map(it=>{const inc=isIncome(it); const evUrl=evidLink(evidOf(it)), who=whoOf(it);
+      <div class="divide-y divide-stone-200/70">${b.items.map(it=>{const inc=isIncome(it); const who=whoOf(it);
         const meta=[it['โครงการ'],it['หมวดหมู่'],who?'โดย '+who:''].filter(Boolean).map(esc).join(' · ');
-        const evBtn=evUrl?`<a href="${esc(evUrl)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>`:'';
+        const evBtn=evidBtns_(it);
         return `<div class="flex items-center justify-between py-2.5 gap-3">
           <div class="min-w-0"><p class="font-kanit font-500 text-stone-800 truncate">${esc(desc(it))}</p><p class="text-[12px] text-stone-400">${meta}</p></div>
           <div class="flex items-center gap-2 shrink-0"><span class="font-kanit font-600 ${inc?'text-green-600':'text-rose-500'}">${inc?'+ ':'– '}${baht(amount(it))}</span>${evBtn}</div>
@@ -242,7 +257,7 @@ window.Finance = (function () {
   function exportCSV(){
     const rows=filtered(); const cell=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
     const head=['วันที่','ประเภท','หมวดหมู่','โครงการ','รายละเอียด','ผู้รับผิดชอบ','ราคา','หลักฐาน'];
-    const getRow=r=>[r['วันที่']||'', r['ประเภท']||'', r['หมวดหมู่']||'', r['โครงการ']||'', desc(r), whoOf(r), amount(r), (evidOf(r)?evidLink(evidOf(r)):'')];
+    const getRow=r=>[r['วันที่']||'', r['ประเภท']||'', r['หมวดหมู่']||'', r['โครงการ']||'', desc(r), whoOf(r), amount(r), evidList(r).join(' | ')];
     const csv=[head.join(',')].concat(rows.map(r=>getRow(r).map(cell).join(','))).join('\r\n');
     const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='รายงานการเงินชมรม.csv';
@@ -265,7 +280,7 @@ window.Finance = (function () {
 
     // รายการทั้งหมด
     const txRows=rows.map(r=>{const inc=isIncome(r);
-      return `<tr><td style="border:1px solid #ddd;padding:5px 8px;white-space:nowrap;">${esc(r['วันที่']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(desc(r))}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(r['หมวดหมู่']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(r['โครงการ']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(whoOf(r))}</td><td style="border:1px solid #ddd;padding:5px 8px;text-align:center;">${evidOf(r)?'✓':''}</td><td style="border:1px solid #ddd;padding:5px 8px;text-align:right;white-space:nowrap;color:${inc?'#15803d':'#b91c1c'};">${inc?'+':'−'} ${baht(amount(r))}</td></tr>`;}).join('')
+      return `<tr><td style="border:1px solid #ddd;padding:5px 8px;white-space:nowrap;">${esc(r['วันที่']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(desc(r))}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(r['หมวดหมู่']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(r['โครงการ']||'')}</td><td style="border:1px solid #ddd;padding:5px 8px;">${esc(whoOf(r))}</td><td style="border:1px solid #ddd;padding:5px 8px;text-align:center;">${(n=>n>1?'✓×'+n:n?'✓':'')(evidList(r).length)}</td><td style="border:1px solid #ddd;padding:5px 8px;text-align:right;white-space:nowrap;color:${inc?'#15803d':'#b91c1c'};">${inc?'+':'−'} ${baht(amount(r))}</td></tr>`;}).join('')
       || `<tr><td colspan="7" style="border:1px solid #ddd;padding:14px;text-align:center;color:#888;">— ไม่มีรายการ —</td></tr>`;
 
     const th='style="background:#14532D;color:#fff;border:1px solid #14532D;padding:7px 8px;font-size:12px;text-align:left;"';
