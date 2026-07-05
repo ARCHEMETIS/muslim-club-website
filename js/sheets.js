@@ -37,7 +37,10 @@ window.Sheets = {
   _approved(row) {
     for (const k in row) {
       if (/^\s*(อนุมัติ|approved?)\s*$/i.test(k)) {
-        return /(ใช่|ผ่าน|อนุมัติ|true|yes|ok|✓|^y$|^1$)/i.test(String(row[k]).trim());
+        const v = String(row[k]).trim();
+        // คำปฏิเสธ/รอ ต้องชนะเสมอ — กัน "ไม่ผ่าน"/"รออนุมัติ" ไปแมตช์คำว่า ผ่าน/อนุมัติ ข้างใน
+        if (/ไม่|รอ|no|reject|pending/i.test(v)) return false;
+        return /(ใช่|ผ่าน|อนุมัติ|true|yes|ok|approved?|✓|^y$|^1$)/i.test(v);
       }
     }
     return true;

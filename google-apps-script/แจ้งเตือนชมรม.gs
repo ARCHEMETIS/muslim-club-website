@@ -56,7 +56,8 @@ const CONFIG = {
 function setup() {
   // ลบตัวตั้งเวลาเก่าของสคริปต์นี้ก่อน (กันซ้ำ)
   ScriptApp.getProjectTriggers().forEach(t => {
-    if (['checkAnnouncements', 'morningDigest'].includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
+    // รวม checkDeadlines (ชื่อฟังก์ชันรุ่นเก่า) ด้วย — คนอัปโค้ดจากรุ่นแรกจะได้ไม่เหลือ trigger ค้าง
+    if (['checkAnnouncements', 'morningDigest', 'checkDeadlines'].includes(t.getHandlerFunction())) ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('checkAnnouncements').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('morningDigest').timeBased().atHour(8).everyDays(1).create();
@@ -84,15 +85,17 @@ function checkAnnouncements() {
   if (rows.length <= last) { props.setProperty('annLastRow', String(rows.length)); return; }
 
   const fresh = rows.slice(last, last + 10);   // เพดาน 10 แถว/รอบ กันสแปม
-  props.setProperty('annLastRow', String(rows.length));
+  // ⚠️ ห้ามเลื่อน annLastRow ก่อนส่ง/เข้าคิวสำเร็จ — ถ้าส่งพลาด (เน็ต/token) รอบหน้าจะได้หยิบมาลองใหม่ ไม่หายเงียบ
 
   if (CONFIG.channel !== 'line') {
     sendMessage_('📢 ประกาศใหม่\n\n' + fresh.map(annLine_).join('\n\n') + '\n\n' + CONFIG.siteUrl);
+    props.setProperty('annLastRow', String(rows.length));
     return;
   }
 
-  // ---- โหมด LINE: ด่วนส่งเลย ที่เหลือเข้าคิว ----
-  const urgent = fresh.filter(r => /ด่วน/.test(String(r['หัวข้อ'] || '') + String(r['หมวดหมู่'] || '')));
+  // ---- โหมด LINE: ด่วนส่งเลย ที่เหลือเข้าคิวรอ digest ----
+  const isUrgent = r => { const s = String(r['หัวข้อ'] || '') + String(r['หมวดหมู่'] || ''); return /ด่วน/.test(s) && !/ไม่ด่วน/.test(s); };
+  const urgent = fresh.filter(isUrgent);
   const normal = fresh.filter(r => !urgent.includes(r));
   if (urgent.length) sendMessage_('🚨 ประกาศด่วน\n\n' + urgent.map(annLine_).join('\n\n') + '\n\n' + CONFIG.siteUrl);
   if (normal.length) {
@@ -100,6 +103,7 @@ function checkAnnouncements() {
     normal.forEach(r => queue.push(annLine_(r)));
     props.setProperty('annQueue', JSON.stringify(queue.slice(-15)));   // เก็บอย่างมาก 15 เรื่อง
   }
+  props.setProperty('annLastRow', String(rows.length));   // มาถึงตรงนี้ = จัดการครบทุกแถวแล้ว
 }
 
 function annLine_(r) {

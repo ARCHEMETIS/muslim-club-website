@@ -71,7 +71,7 @@ window.Finance = (function () {
 
   // ---------- สถานะ ----------
   let ALL = SAMPLE.slice();
-  let fYear='all', fCat='all', fProject='all', bMode='expense';
+  let fYear='all', fCat='all', fProject='all', bMode='expense', showAllTx=false;
   let calY=2026, calM=3, calSel=null, calData={};
 
   function years(){ const s=new Set(); ALL.forEach(r=>{const d=parseDate(r['วันที่']);if(d)s.add(d.getFullYear());}); return [...s].sort((a,b)=>b-a); }
@@ -104,7 +104,7 @@ window.Finance = (function () {
     set('finExpenseCount',rows.filter(r=>!isIncome(r)).length+' รายการ');
     const sorted=rows.slice().sort((a,b)=>(parseDate(b['วันที่'])||0)-(parseDate(a['วันที่'])||0));
     if(sorted[0]) set('finUpdated',sorted[0]['วันที่']);
-    renderChart(rows); renderToggle(); renderDonut(rows); renderTable(sorted.slice(0,6));
+    renderChart(rows); renderToggle(); renderDonut(rows); renderTable(sorted);
     renderProjects(rows); renderCalendar();
   }
 
@@ -149,7 +149,14 @@ window.Finance = (function () {
     if(legend) legend.innerHTML=items.length?items.map(it=>`<li class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm" style="background:${it.color}"></span> ${esc(it.name)}</span><span class="font-kanit font-600 text-stone-700">${Math.round(it.pct)}%</span></li>`).join(''):`<li class="text-center text-stone-400 py-2">ไม่มีข้อมูล</li>`;
   }
 
-  function renderTable(recent){ const body=document.getElementById('finTxBody'); if(!body)return;
+  // ตารางรายการ: ปกติโชว์ 6 รายการล่าสุด · กด "ดูทั้งหมด" = โชว์ทุกรายการตามตัวกรอง
+  function renderTable(all){ const body=document.getElementById('finTxBody'); if(!body)return;
+    const recent = showAllTx ? all : all.slice(0,6);
+    const toggle=document.getElementById('finTxToggle');
+    if(toggle){
+      toggle.style.display = all.length>6 ? '' : 'none';   // ไม่เกิน 6 รายการ ไม่ต้องมีปุ่ม
+      toggle.textContent = showAllTx ? 'แสดงย่อ' : `ดูทั้งหมด (${all.length} รายการ)`;
+    }
     body.innerHTML=recent.length?recent.map(r=>{const inc=isIncome(r),st=txIcon(r),amt=(inc?'+ ':'– ')+baht(amount(r));
       const evUrl=evidLink(evidOf(r));
       const evCell = evUrl ? `<a href="${esc(evUrl)}" target="_blank" rel="noopener" title="ดูหลักฐาน" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-700 hover:bg-green-100 transition"><i class="fa-solid fa-receipt text-sm"></i></a>` : '<span class="text-stone-300">—</span>';
@@ -228,6 +235,7 @@ window.Finance = (function () {
   function setCat(v){ fCat=v; update(); }
   function setProject(v){ fProject=v; update(); }
   function setBreakdown(m){ bMode=m; renderToggle(); renderDonut(filtered()); }
+  function toggleTx(e){ if(e)e.preventDefault(); showAllTx=!showAllTx; update(); }
   function calMove(d){ calM+=d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} calSel=null; renderCalendar(); }
   function calDay(day){ calSel=(calSel===day?null:day); renderCalendar(); }
 
@@ -372,5 +380,5 @@ window.Finance = (function () {
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { setYear, setCat, setProject, setBreakdown, calMove, calDay, exportCSV, printReport, toggleLedger, setSchoolYear };
+  return { setYear, setCat, setProject, setBreakdown, toggleTx, calMove, calDay, exportCSV, printReport, toggleLedger, setSchoolYear };
 })();

@@ -375,7 +375,7 @@
     <div class="bg-white rounded-2xl border border-stone-100 shadow-sm mt-7 overflow-hidden">
       <div class="p-6 pb-3 flex items-center justify-between">
         <h3 class="font-kanit font-600 text-lg text-green-900">รายการเคลื่อนไหวล่าสุด</h3>
-        <a href="#" class="text-green-700 text-sm font-kanit font-500 hover:underline">ดูทั้งหมด</a>
+        <a href="#" id="finTxToggle" onclick="Finance.toggleTx(event)" class="text-green-700 text-sm font-kanit font-500 hover:underline">ดูทั้งหมด</a>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left min-w-[560px]">
@@ -543,7 +543,7 @@
 <!-- ⬇️ ระบบทั้งหมดของเว็บ โหลดตามลำดับนี้ (config ต้องมาก่อนเสมอ) -->
 <!-- โหลด config ใหม่เสมอ (กันแคช) เพื่อให้คำที่แก้ใน config.js ขึ้นทันที -->
 <script>document.write('<scr'+'ipt src="js/config.js?t='+Date.now()+'"><\/scr'+'ipt>');</script>
-<script src="js/sheets.js?v=2"></script>
+<script src="js/sheets.js?v=3"></script>
 <script src="js/main.js?v=2"></script>
 <script src="js/content.js?v=2"></script>
 <script src="js/prayer.js?v=2"></script>
@@ -552,7 +552,7 @@
 <script src="js/knowledge.js?v=4"></script>
 <script src="js/gallery.js?v=2"></script>
 <script src="js/events.js?v=4"></script>
-<script src="js/finance.js?v=13"></script>
+<script src="js/finance.js?v=14"></script>
 <script src="js/announcements.js?v=7"></script>
 <script src="js/committee.js?v=8"></script>
 <script src="js/contact.js?v=3"></script>
