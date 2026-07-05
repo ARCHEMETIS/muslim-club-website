@@ -50,16 +50,24 @@
       { key:'membership',    icon:'fa-user-plus',   color:'green-800', title:'ฟอร์มสมัครสมาชิก',  desc:'ลิงก์ฟอร์มไว้แชร์ให้สมาชิกใหม่' },
     ];
     const F = (window.CONFIG && CONFIG.forms) || {};
+    const S = (window.CONFIG && CONFIG.sheetEdit) || {};   // ลิงก์ "แก้ไขในชีต" (ตั้งใน config.js ข้อ 3.1)
     document.getElementById('formGrid').innerHTML = FORMS.map(f => {
-      const url = F[f.key];
+      const url = F[f.key], sheet = S[f.key];
+      // ปุ่มหลัก: ฟอร์ม → ถ้าไม่มีฟอร์มแต่มีชีต (เช่น ตารางกิจกรรมที่แก้ในชีตสะดวกกว่า) → เปิดชีตแทน
       const action = url
         ? `<a href="${url}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 bg-green-800 hover:bg-green-900 text-white font-kanit font-500 px-5 py-2.5 rounded-full transition w-full">เปิดฟอร์ม <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>`
-        : `<span class="mt-4 inline-flex items-center justify-center gap-2 bg-stone-100 text-stone-400 font-kanit font-500 px-5 py-2.5 rounded-full w-full">ยังไม่ได้ตั้งค่าลิงก์</span>`;
+        : (sheet
+          ? `<a href="${sheet}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 bg-green-800 hover:bg-green-900 text-white font-kanit font-500 px-5 py-2.5 rounded-full transition w-full"><i class="fa-solid fa-table-cells"></i> เปิดชีต</a>`
+          : `<span class="mt-4 inline-flex items-center justify-center gap-2 bg-stone-100 text-stone-400 font-kanit font-500 px-5 py-2.5 rounded-full w-full">ยังไม่ได้ตั้งค่าลิงก์</span>`);
+      // ลิงก์รอง: กรอกผิด/อยากลบ → แก้ในชีตได้เลย (โชว์เมื่อมีทั้งฟอร์มและชีต)
+      const edit = (url && sheet)
+        ? `<a href="${sheet}" target="_blank" rel="noopener" class="mt-2 inline-flex items-center justify-center gap-1.5 text-[13px] font-kanit text-stone-400 hover:text-green-700 transition"><i class="fa-solid fa-pen-to-square text-xs"></i> กรอกผิด? แก้ไขในชีต</a>`
+        : '';
       return `<div class="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col">
         <span class="w-12 h-12 rounded-xl bg-green-50 text-${f.color} grid place-items-center text-xl mb-4"><i class="fa-solid ${f.icon}"></i></span>
         <h3 class="font-kanit font-600 text-lg text-green-900">${f.title}</h3>
         <p class="text-stone-500 text-sm mt-1 flex-1">${f.desc}</p>
-        ${action}
+        ${action}${edit}
       </div>`;
     }).join('');
   </script>

@@ -65,10 +65,11 @@ window.Events = (function () {
     return `<span class="shrink-0 inline-flex items-center gap-1.5 bg-stone-100 text-stone-400 font-kanit font-500 text-sm px-3 py-1 rounded-full">ผ่านไปแล้ว ${-n} วัน</span>`;
   }
 
-  // ป้ายเดดไลน์ของแต่ละหน้าที่ (สีตามความเร่งด่วน · งานเสร็จแล้วเป็นสีจาง)
-  function deadlineChip(t){
+  // ป้ายเดดไลน์ของแต่ละหน้าที่ (สีตามความเร่งด่วน · งานเสร็จ/กิจกรรมจบแล้ว เป็นสีจาง)
+  function deadlineChip(t, eventPast){
     const d=parseDate(t.deadline); if(!d) return '';
-    if(isDone(t.status)) return `<span class="shrink-0 inline-flex items-center gap-1 bg-stone-100 text-stone-400 font-kanit text-[11px] px-2 py-0.5 rounded-full"><i class="fa-regular fa-flag"></i> ${fmtShort(d)}</span>`;
+    // งานเสร็จแล้ว หรือกิจกรรมผ่านไปแล้ว → ไม่ต้องเตือน "เลยกำหนด" ค้างสีแดงตลอดกาล
+    if(isDone(t.status) || eventPast) return `<span class="shrink-0 inline-flex items-center gap-1 bg-stone-100 text-stone-400 font-kanit text-[11px] px-2 py-0.5 rounded-full"><i class="fa-regular fa-flag"></i> ${fmtShort(d)}</span>`;
     const n=daysUntil(d);
     let cls='bg-stone-100 text-stone-500', txt=`ครบ ${fmtShort(d)}`, extra='';
     if(n<0){ cls='bg-rose-100 text-rose-700'; txt=`เลยกำหนด ${-n} วัน`; }
@@ -78,7 +79,7 @@ window.Events = (function () {
   }
 
   // จัดกลุ่มหน้าที่ตาม "ฝ่าย" → ฝ่ายมีหลายหน้าที่ก็โชว์ชื่อฝ่ายครั้งเดียว แล้วไล่เป็นข้อ ๆ
-  function deptBlocks(g){
+  function deptBlocks(g, eventPast){
     const map={}, order=[];
     g.tasks.forEach(t=>{ const k=t.dept||'อื่น ๆ'; if(!map[k]){map[k]=[];order.push(k);} map[k].push(t); });
     return order.map(dept=>{ const tasks=map[dept]; const done=tasks.filter(t=>isDone(t.status)).length;
@@ -90,7 +91,7 @@ window.Events = (function () {
         <div class="pl-5 space-y-1.5">${tasks.map(t=>{ const st=statusOf(t.status);
           return `<div class="flex items-center justify-between gap-2 flex-wrap">
             <span class="text-[13px] text-stone-500 min-w-0 flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-stone-300 text-[10px]"></i> ${t.task?esc(t.task):'<span class="text-stone-300">—</span>'}</span>
-            <span class="flex items-center gap-1.5 shrink-0">${deadlineChip(t)}<span class="inline-flex items-center gap-1 ${st.cls} font-kanit font-500 text-[11px] px-2 py-0.5 rounded-full"><i class="fa-solid ${st.icon} text-[10px]"></i> ${st.label}</span></span>
+            <span class="flex items-center gap-1.5 shrink-0">${deadlineChip(t, eventPast)}<span class="inline-flex items-center gap-1 ${st.cls} font-kanit font-500 text-[11px] px-2 py-0.5 rounded-full"><i class="fa-solid ${st.icon} text-[10px]"></i> ${st.label}</span></span>
           </div>`;}).join('')}</div>
       </div>`;
     }).join('');
@@ -121,7 +122,7 @@ window.Events = (function () {
         </div>
         ${g.desc?`<p class="text-stone-500 text-[14px] mt-2 leading-relaxed">${esc(g.desc)}</p>`:''}
         ${progress(g)}
-        ${g.tasks.length?`<div class="mt-4 bg-stone-50/70 rounded-xl p-3"><p class="text-[12px] font-kanit font-600 text-stone-500 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-list-check text-gold-dark"></i> ฝ่ายรับผิดชอบ & เดดไลน์</p>${deptBlocks(g)}</div>`:''}
+        ${g.tasks.length?`<div class="mt-4 bg-stone-50/70 rounded-xl p-3"><p class="text-[12px] font-kanit font-600 text-stone-500 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-list-check text-gold-dark"></i> ฝ่ายรับผิดชอบ & เดดไลน์</p>${deptBlocks(g, isPast)}</div>`:''}
       </div>
     </div>`;
   }
