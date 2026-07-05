@@ -51,7 +51,8 @@ window.Finance = (function () {
   // ลิงก์หลักฐาน: ถ้าเป็นไดรฟ์ → เปิดหน้าดูไฟล์ ไม่งั้นใช้ลิงก์ตรง (เฉพาะ http(s))
   function evidLink(u){ u=String(u||'').trim(); const m=u.match(/\/d\/([-\w]{20,})/)||u.match(/[?&]id=([-\w]{20,})/); if(m) return `https://drive.google.com/file/d/${m[1]}/view`; return window.safeHttp(u)?u:''; }
   const esc = window.esc;
-  const baht = n => '฿' + Math.round(n).toLocaleString('th-TH');
+  // แสดงยอดเงิน: จำนวนเต็ม = ฿4,200 · มีสตางค์ = ฿99.50 (ไม่ปัดทิ้ง)
+  const baht = n => { n=Math.round(n*100)/100; return '฿' + n.toLocaleString('th-TH',{minimumFractionDigits:n%1?2:0, maximumFractionDigits:2}); };
   const short = n => n>=1000 ? '฿'+Math.round(n/1000)+'K' : '฿'+Math.round(n);
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
 
