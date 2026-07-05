@@ -78,6 +78,7 @@ Hiring a CMS or running a server was overkill for a volunteer-run club with no b
 | 📚 **Knowledge library** | Religious learning media (lecture summaries, books, articles, video, audio); **in-browser viewer** opens PDFs/images/video in a lightbox without leaving the site |
 | 🗓️ **Activities** | Timeline split into *upcoming* (with countdown) and *past*; per-department task tracking with **per-task deadlines** colour-coded by urgency (overdue / due-soon / done) |
 | 💰 **Finance** | Income/expense summary, monthly bar chart, expense donut, **clickable daily calendar** (built for Ramadan iftar tracking), per-project breakdown, per-year selector, CSV export, and a **formatted printable report** with signature lines + receipt links |
+| 📸 **Photo gallery** | Event albums backed by plain **Google Drive folders** — the committee shares a folder link in a sheet row; visitors browse the whole album **inside the site** via Drive's `embeddedfolderview` (no API key, no quota) |
 | 📣 **Announcements** | News cards on the home page with images (auto-handles Google Drive image links) |
 | 👥 **Committee** | Auto-sorted by role, click-to-copy phone/email, Facebook links, generated avatars |
 | ✉️ **Contact** | Editable info + embedded membership Google Form |
@@ -96,6 +97,10 @@ Things in here I'm proud of as an engineering exercise:
 - **Offline-capable PWA** — web app manifest + a **network-first service worker** scoped to same-origin assets only, so the live Google-Sheets data always stays fresh while the app shell still works offline.
 - **Graceful degradation** — sample data renders when a sheet is empty or the network fails; the site never shows a broken page.
 - **Zero runtime CDN risk for styling** — Tailwind is compiled to a local file, so the layout never depends on a CDN being reachable.
+- **XSS hardening for untrusted sheet data** — a single shared HTML-escaper (covering `'` for inline handlers) plus an **http(s)-only URL guard** applied at every `href` / `iframe` / `img` sink, since sheet content is user-submittable via Forms.
+- **Opt-in moderation** — add an `อนุมัติ` (approved) column to any sheet and rows stay hidden until a committee member ticks them; sheets without the column behave as before. One filter in the shared data layer covers every page.
+- **Serverless notification bot** (Google Apps Script) — pushes new announcements and department-deadline digests to the committee's LINE group while staying inside LINE OA's free 300-message quota: per-member cost accounting, digest batching on configurable days, a live quota guard that checks remaining credits via API before each push, and **free unlimited reply commands** (`เดดไลน์` / `ประกาศ` / `ลิงก์` / `โควตา`) over a webhook.
+- **Accessible chart palettes** — donut/bar colors validated programmatically for color-blind separation, lightness spacing, and contrast (income = green ramp, expense = red ramp, never mixed in one chart).
 
 ## Tech stack
 
@@ -104,12 +109,13 @@ Things in here I'm proud of as an engineering exercise:
 - **Google Sheets** (published CSV) + **Google Forms** + **Google Drive** as the data layer
 - **Aladhan API** for prayer times
 - **PWA** — web manifest + service worker (installable, offline-capable)
+- **Google Apps Script** — serverless notification bot (LINE Messaging API / Telegram / Discord)
 - **Netlify** for static hosting (HTTPS, free)
 
 ## Project structure
 
 ```
-├── index.html               # main single-page app (6 sections)
+├── index.html               # main single-page app (7 sections)
 ├── team.html                # private form hub for the committee (noindex)
 ├── manifest.webmanifest     # PWA manifest (name, icons, theme)
 ├── sw.js                    # service worker (offline shell + fresh live data)
@@ -125,6 +131,7 @@ Things in here I'm proud of as an engineering exercise:
 │   ├── prayer.js            # prayer times (Aladhan API + cache)
 │   ├── documents.js         # document archive
 │   ├── knowledge.js         # knowledge library
+│   ├── gallery.js           # photo gallery (Drive-folder albums)
 │   ├── events.js            # activities timeline + deadlines
 │   ├── finance.js           # finance dashboard + printable report
 │   ├── announcements.js     # news cards
@@ -133,7 +140,9 @@ Things in here I'm proud of as an engineering exercise:
 │   └── viewer.js            # reusable PDF/image/video lightbox
 ├── assets/img/              # logo, artwork, PWA icons
 ├── google-sheets-templates/ # CSV templates + setup guides (Thai)
+├── google-apps-script/      # LINE/Telegram/Discord notification bot + setup guide
 ├── docs/screenshots/        # screenshots for this README
+├── docs/คู่มือส่งมอบรุ่น.md   # committee handover playbook (Thai)
 ├── tailwind.config.js       # Tailwind theme + content sources
 └── คู่มือ-README.md          # maintainer's guide (Thai)
 ```
